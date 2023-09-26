@@ -1,9 +1,9 @@
-package com.foxminded.services.impl;
+package com.foxminded.service.impl;
 
-import com.foxminded.dao.GroupsDao;
+import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
-import com.foxminded.services.GroupsService;
+import com.foxminded.service.GroupsService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,21 +12,21 @@ import java.util.stream.Collectors;
 
 public class GroupsServiceImpl implements GroupsService {
 
-    private final GroupsDao groupsDao;
+    private final GroupDao groupDao;
 
     public GroupsServiceImpl() {
-        groupsDao = new GroupsDao();
+        groupDao = new GroupDao();
     }
 
     @Override
     public List<Group> getGroupsByIds(List<Integer> ids) {
-        return groupsDao.getGroupsByIds(ids);
+        return groupDao.getGroupsByIds(ids);
     }
 
     @Override
     public List<Student> setGroupToStudents(Map<Student, Integer> studentsGroupIds) {
         for (var entry : studentsGroupIds.entrySet()) {
-            Group group = groupsDao.getGroupById(entry.getValue());
+            Group group = groupDao.getGroupById(entry.getValue());
             Student student = entry.getKey();
             student.setGroup(group);
         }
@@ -36,7 +36,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public List<String> getAllGroupNames() {
-        return groupsDao.getAllGroups()
+        return groupDao.getAllGroups()
                 .stream()
                 .map(Group::getName)
                 .collect(Collectors.toList());
@@ -44,12 +44,12 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public Group getGroupByName(String name) {
-        return groupsDao.getGroupByName(name);
+        return groupDao.getGroupByName(name);
     }
 
     @Override
     public void saveGroups(List<Group> groups) {
-        groupsDao.saveGroups(groups);
+        groupDao.saveGroups(groups);
     }
 
 }

@@ -1,32 +1,32 @@
-package com.foxminded.services.impl;
+package com.foxminded.service.impl;
 
-import com.foxminded.dao.CoursesDao;
+import com.foxminded.dao.CourseDao;
 import com.foxminded.domain.Course;
-import com.foxminded.services.CoursesService;
+import com.foxminded.service.CoursesService;
 
 import java.util.List;
 
 public class CoursesServiceImpl implements CoursesService {
 
-    private final CoursesDao coursesDao;
+    private final CourseDao courseDao;
 
     public CoursesServiceImpl() {
-        coursesDao = new CoursesDao();
+        courseDao = new CourseDao();
     }
 
     @Override
     public int getIdByName(String name) {
-        return coursesDao.getIdByName(name);
+        return courseDao.getIdByName(name);
     }
 
     @Override
     public List<Course> getCoursesByIds(List<Integer> ids) {
-        return coursesDao.getCoursesByIds(ids);
+        return courseDao.getCoursesByIds(ids);
     }
 
     @Override
     public void saveCourses(List<Course> courses) {
-        coursesDao.saveCourses(courses);
+        courseDao.saveCourses(courses);
     }
 
 }

@@ -1,50 +1,48 @@
-package com.foxminded.services.impl;
+package com.foxminded.service.impl;
 
-import com.foxminded.dao.StudentsDao;
-import com.foxminded.domain.Group;
+import com.foxminded.dao.StudentDao;
 import com.foxminded.domain.Student;
-import com.foxminded.services.StudentsService;
+import com.foxminded.service.StudentsService;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class StudentsServiceImpl implements StudentsService {
 
-    private final StudentsDao studentsDao;
+    private final StudentDao studentDao;
 
     public StudentsServiceImpl() {
-        studentsDao = new StudentsDao();
+        studentDao = new StudentDao();
     }
 
     @Override
     public List<Integer> getGroupsIdByStudentNumber(int number) {
-        return studentsDao.getGroupsIdByStudentNumber(number);
+        return studentDao.getGroupsIdByStudentNumber(number);
     }
 
     @Override
     public Map<Student, Integer> getStudentsByIds(List<Integer> ids) {
-        return studentsDao.getStudentsByIds(ids);
+        return studentDao.getStudentsByIds(ids);
     }
 
     @Override
     public void saveStudent(String firstName, String lastName, int groupId) {
-        studentsDao.saveStudent(firstName, lastName, groupId);
+        studentDao.saveStudent(firstName, lastName, groupId);
     }
 
     @Override
     public boolean deleteStudentById(int id) {
-        return studentsDao.deleteStudentById(id);
+        return studentDao.deleteStudentById(id);
     }
 
     @Override
     public Map<Student, Integer> getStudentById(int id) {
-        return studentsDao.getStudentById(id);
+        return studentDao.getStudentById(id);
     }
 
     @Override
     public void saveStudents(List<Student> students) {
-        studentsDao.saveStudents(students);
+        studentDao.saveStudents(students);
     }
 
 }

@@ -1,6 +1,5 @@
-package com.foxminded.services;
+package com.foxminded.service;
 
-import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 
 import java.util.List;

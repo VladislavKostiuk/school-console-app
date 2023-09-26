@@ -13,11 +13,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CoursesDao {
+public class CourseDao {
 
     private DaoFactory daoFactory;
 
-    public CoursesDao() {
+    public CourseDao() {
         daoFactory = new DaoFactory();
     }
 

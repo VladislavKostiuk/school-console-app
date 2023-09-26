@@ -1,7 +1,6 @@
 package com.foxminded.dao;
 
 import com.foxminded.dao.factrory.DaoFactory;
-import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.utility.SqlPartsCreator;
 import com.foxminded.utility.StreamCloser;
@@ -15,11 +14,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StudentsDao {
+public class StudentDao {
 
     private DaoFactory daoFactory;
 
-    public StudentsDao() {
+    public StudentDao() {
         daoFactory = new DaoFactory();
     }
 

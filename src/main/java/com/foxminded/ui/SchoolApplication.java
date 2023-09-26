@@ -5,8 +5,8 @@ import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
-import com.foxminded.services.*;
-import com.foxminded.services.impl.*;
+import com.foxminded.service.*;
+import com.foxminded.service.impl.*;
 
 import java.util.ArrayList;
 import java.util.List;

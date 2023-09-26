@@ -1,17 +1,13 @@
-package com.foxminded.services.impl;
+package com.foxminded.service.impl;
 
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.constants.FileNames;
-import com.foxminded.dao.CoursesDao;
-import com.foxminded.dao.StudentsCoursesDao;
 import com.foxminded.dao.factrory.DaoFactory;
-import com.foxminded.dao.GroupsDao;
-import com.foxminded.dao.StudentsDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.helper.TestDataGenerator;
-import com.foxminded.services.*;
+import com.foxminded.service.*;
 import org.apache.ibatis.jdbc.ScriptRunner;
 
 import java.io.IOException;

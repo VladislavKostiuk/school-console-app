@@ -12,11 +12,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StudentsCoursesDao {
+public class StudentsCourseDao {
 
     private DaoFactory daoFactory;
 
-    public StudentsCoursesDao() {
+    public StudentsCourseDao() {
         daoFactory = new DaoFactory();
     }
     public void saveStudentsCourses(List<Student> students) {

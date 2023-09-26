@@ -1,4 +1,4 @@
-package com.foxminded.services;
+package com.foxminded.service;
 
 public interface DatabaseInitService {
 

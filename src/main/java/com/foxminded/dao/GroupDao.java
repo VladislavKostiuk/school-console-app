@@ -12,11 +12,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GroupsDao {
+public class GroupDao {
 
     private DaoFactory daoFactory;
 
-    public GroupsDao() {
+    public GroupDao() {
         daoFactory = new DaoFactory();
     }
 

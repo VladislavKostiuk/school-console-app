@@ -1,47 +1,47 @@
-package com.foxminded.services.impl;
+package com.foxminded.service.impl;
 
-import com.foxminded.dao.StudentsCoursesDao;
+import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Student;
-import com.foxminded.services.StudentsCoursesService;
+import com.foxminded.service.StudentsCoursesService;
 
 import java.util.List;
 
 public class StudentsCoursesServiceImpl implements StudentsCoursesService {
 
-    private final StudentsCoursesDao studentsCoursesDao;
+    private final StudentsCourseDao studentsCourseDao;
 
     public StudentsCoursesServiceImpl() {
-        studentsCoursesDao = new StudentsCoursesDao();
+        studentsCourseDao = new StudentsCourseDao();
     }
 
     @Override
     public List<Integer> getStudentsIdByCourseId(int courseId) {
-        return studentsCoursesDao.getStudentsIdByCourseId(courseId);
+        return studentsCourseDao.getStudentsIdByCourseId(courseId);
     }
 
     @Override
     public boolean deleteStudentCoursesByStudentId(int studentId) {
-        return studentsCoursesDao.deleteStudentCoursesByStudentId(studentId);
+        return studentsCourseDao.deleteStudentCoursesByStudentId(studentId);
     }
 
     @Override
     public List<Integer> getCourseIdsByStudentId(int studentId) {
-        return studentsCoursesDao.getCourseIdsByStudentId(studentId);
+        return studentsCourseDao.getCourseIdsByStudentId(studentId);
     }
 
     @Override
     public void addStudentToCourse(int studentId, int courseId) {
-        studentsCoursesDao.addStudentToCourse(studentId, courseId);
+        studentsCourseDao.addStudentToCourse(studentId, courseId);
     }
 
     @Override
     public boolean deleteStudentFromCourse(int studentId, int courseId) {
-        return studentsCoursesDao.deleteStudentFromCourse(studentId, courseId);
+        return studentsCourseDao.deleteStudentFromCourse(studentId, courseId);
     }
 
     @Override
     public void saveStudentsCourses(List<Student> students) {
-        studentsCoursesDao.saveStudentsCourses(students);
+        studentsCourseDao.saveStudentsCourses(students);
     }
 
 }
