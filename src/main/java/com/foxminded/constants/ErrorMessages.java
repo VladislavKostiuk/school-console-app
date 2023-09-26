@@ -1,6 +1,7 @@
 package com.foxminded.constants;
 
 public final class ErrorMessages {
+
     public final static String CONNECTION_CANT_BE_NULL = "Connection can't be null";
     public final static String FILE_WAS_NOT_FOUND = "File %s was not found";
     public final static String NO_MORE_AVAILABLE_NAMES_FOR_COURSES = "There are no more available names for courses";
@@ -17,4 +18,5 @@ public final class ErrorMessages {
     public final static String STUDENT_ALREADY_HAS_THAT_COURSE = " \"That student already has %s in his course list\"";
 
     private ErrorMessages() {}
+
 }

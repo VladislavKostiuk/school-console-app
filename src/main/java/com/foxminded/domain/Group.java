@@ -1,6 +1,7 @@
 package com.foxminded.domain;
 
 public class Group {
+
     private int id;
     private String name;
     public int getId() {
@@ -23,4 +24,5 @@ public class Group {
     public String toString() {
         return "Group(id: " + id + ", name: " + name + ")";
     }
+
 }

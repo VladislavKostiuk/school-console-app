@@ -1,9 +1,10 @@
 package com.foxminded.dao;
 
-import com.foxminded.CourseName;
+import com.foxminded.enums.CourseName;
 import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Course;
 import com.foxminded.utility.SqlPartsCreator;
+import com.foxminded.utility.StreamCloser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,25 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CoursesDao {
+
     private DaoFactory daoFactory;
 
     public CoursesDao() {
         daoFactory = new DaoFactory();
     }
 
-    public void addCourse(Course course) {
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO courses(course_name, course_description) VALUES (?, ?)")) {
-            statement.setString(1, course.getName().toString());
-            statement.setString(2, course.getDescription());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addCourses(List<Course> courses) {
+    public void saveCourses(List<Course> courses) {
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO courses(course_name, course_description) VALUES (?, ?)");) {
@@ -59,13 +49,7 @@ public class CoursesDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return courseId;
@@ -92,15 +76,10 @@ public class CoursesDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return courses;
     }
+
 }

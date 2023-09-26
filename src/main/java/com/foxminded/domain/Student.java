@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Student {
+
     private int id;
     private Group group;
     private String firstName;
@@ -62,4 +63,5 @@ public class Student {
                 ", last name: " + lastName +
                 ")";
     }
+
 }

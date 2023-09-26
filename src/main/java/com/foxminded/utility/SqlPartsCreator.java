@@ -1,6 +1,7 @@
 package com.foxminded.utility;
 
 public final class SqlPartsCreator {
+
     private SqlPartsCreator() {}
 
     public static String createInPart(int listSize) {
@@ -17,4 +18,5 @@ public final class SqlPartsCreator {
 
         return sql.toString();
     }
+
 }

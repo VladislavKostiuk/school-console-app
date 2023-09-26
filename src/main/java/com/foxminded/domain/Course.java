@@ -1,8 +1,9 @@
 package com.foxminded.domain;
 
-import com.foxminded.CourseName;
+import com.foxminded.enums.CourseName;
 
 public class Course {
+
     private int id;
     private CourseName name;
     private String description;
@@ -30,4 +31,5 @@ public class Course {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }

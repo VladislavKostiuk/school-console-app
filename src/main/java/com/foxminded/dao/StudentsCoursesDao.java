@@ -3,6 +3,7 @@ package com.foxminded.dao;
 import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Student;
+import com.foxminded.utility.StreamCloser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,12 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StudentsCoursesDao {
+
     private DaoFactory daoFactory;
 
     public StudentsCoursesDao() {
         daoFactory = new DaoFactory();
     }
-    public void addSomeStudentsCourses(List<Student> students) {
+    public void saveStudentsCourses(List<Student> students) {
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO students_courses(student_id, course_id) VALUES (?, ?)")) {
@@ -49,13 +51,7 @@ public class StudentsCoursesDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return studentIds;
@@ -90,13 +86,7 @@ public class StudentsCoursesDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return courseIds;
@@ -128,4 +118,5 @@ public class StudentsCoursesDao {
 
         return rowsAffected != 0;
     }
+
 }

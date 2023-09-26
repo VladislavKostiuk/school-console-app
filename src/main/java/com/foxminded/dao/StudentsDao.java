@@ -4,6 +4,7 @@ import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.utility.SqlPartsCreator;
+import com.foxminded.utility.StreamCloser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class StudentsDao {
+
     private DaoFactory daoFactory;
 
     public StudentsDao() {
@@ -35,19 +37,13 @@ public class StudentsDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return groupIdList;
     }
 
-    public void addStudent(String firstName, String lastName, int groupId) {
+    public void saveStudent(String firstName, String lastName, int groupId) {
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)")) {
@@ -60,7 +56,7 @@ public class StudentsDao {
         }
     }
 
-    public void addStudents(List<Student> students) {
+    public void saveStudents(List<Student> students) {
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)");) {
@@ -98,13 +94,7 @@ public class StudentsDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return studentsGroupIds;

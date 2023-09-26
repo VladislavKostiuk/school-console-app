@@ -1,4 +1,4 @@
-package com.foxminded;
+package com.foxminded.enums;
 
 public enum CourseName {
     MATH,

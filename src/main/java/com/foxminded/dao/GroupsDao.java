@@ -3,6 +3,7 @@ package com.foxminded.dao;
 import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Group;
 import com.foxminded.utility.SqlPartsCreator;
+import com.foxminded.utility.StreamCloser;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,24 +13,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GroupsDao {
+
     private DaoFactory daoFactory;
 
     public GroupsDao() {
         daoFactory = new DaoFactory();
     }
 
-    public void addGroup(Group group) {
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO groups(group_name) VALUES (?)")) {
-            statement.setString(1, group.getName());
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void addGroups(List<Group> groups) {
+    public void saveGroups(List<Group> groups) {
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement(
                      "INSERT INTO groups(group_name) VALUES (?)")) {
@@ -67,13 +58,7 @@ public class GroupsDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return groups;
@@ -93,13 +78,7 @@ public class GroupsDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return group;
@@ -119,13 +98,7 @@ public class GroupsDao {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            StreamCloser.closeResultSet(resultSet);
         }
 
         return group;
@@ -135,7 +108,7 @@ public class GroupsDao {
         List<Group> groups = new ArrayList<>();
         try (Connection connection = daoFactory.getConnection();
              PreparedStatement statement = connection.prepareStatement("SELECT * FROM groups");
-             ResultSet resultSet = statement.executeQuery();) {
+             ResultSet resultSet = statement.executeQuery()) {
             while (resultSet.next()) {
                 Group group = new Group();
                 group.setId(resultSet.getInt("group_id"));

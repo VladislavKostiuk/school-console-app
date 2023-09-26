@@ -8,6 +8,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DaoFactory {
+
     public Connection getConnection() {
         try {
             return DriverManager.getConnection(
@@ -17,4 +18,5 @@ public class DaoFactory {
             throw new RuntimeException(ErrorMessages.INCORRECT_DB_PROPERTIES);
         }
     }
+
 }
