@@ -7,7 +7,7 @@ import java.util.Map;
 
 public interface StudentsService {
 
-    List<Integer> getGroupsIdByStudentNumber(int number);
+    List<Integer> getGroupIdsByStudentNumber(int number);
 
     Map<Student, Integer> getStudentsByIds(List<Integer> ids);
 
@@ -18,5 +18,7 @@ public interface StudentsService {
     Map<Student, Integer> getStudentById(int id);
 
     void saveStudents(List<Student> students);
+
+    boolean isEmpty();
 
 }

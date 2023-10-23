@@ -25,4 +25,31 @@ public class Group {
         return "Group(id: " + id + ", name: " + name + ")";
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof Group)) {
+            return false;
+        }
+
+        Group someGroup = (Group) obj;
+
+        if ((this.name == null) ? (someGroup.name != null) : !this.name.equals(someGroup.name)) {
+            return false;
+        }
+
+        return this.id == someGroup.id;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash += 31 * id;
+        hash += 31 * (name != null ? name.hashCode() : 0);
+        return hash;
+    }
+
 }

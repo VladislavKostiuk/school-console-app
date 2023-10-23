@@ -3,15 +3,20 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Student;
 import com.foxminded.service.StudentsCoursesService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Service
 public class StudentsCoursesServiceImpl implements StudentsCoursesService {
 
     private final StudentsCourseDao studentsCourseDao;
 
-    public StudentsCoursesServiceImpl() {
-        studentsCourseDao = new StudentsCourseDao();
+    @Autowired
+    public StudentsCoursesServiceImpl(StudentsCourseDao studentsCourseDao) {
+        this.studentsCourseDao = studentsCourseDao;
     }
 
     @Override
@@ -41,7 +46,18 @@ public class StudentsCoursesServiceImpl implements StudentsCoursesService {
 
     @Override
     public void saveStudentsCourses(List<Student> students) {
-        studentsCourseDao.saveStudentsCourses(students);
+        List<int[]> studentsCourses = new ArrayList<>();
+        for (var student : students) {
+            for (var course : student.getCourses()) {
+                studentsCourses.add(new int[] {student.getId(), course.getId()});
+            }
+        }
+        studentsCourseDao.saveStudentsCourses(studentsCourses);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return studentsCourseDao.getStudentCoursesAmount() == 0;
     }
 
 }

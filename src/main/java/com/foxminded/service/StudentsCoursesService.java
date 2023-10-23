@@ -18,4 +18,6 @@ public interface StudentsCoursesService {
 
     void saveStudentsCourses(List<Student> students);
 
+    boolean isEmpty();
+
 }

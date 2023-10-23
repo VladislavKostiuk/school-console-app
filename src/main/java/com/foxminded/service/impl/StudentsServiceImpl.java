@@ -3,21 +3,25 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.StudentDao;
 import com.foxminded.domain.Student;
 import com.foxminded.service.StudentsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class StudentsServiceImpl implements StudentsService {
 
     private final StudentDao studentDao;
 
-    public StudentsServiceImpl() {
-        studentDao = new StudentDao();
+    @Autowired
+    public StudentsServiceImpl(StudentDao studentDao) {
+        this.studentDao = studentDao;
     }
 
     @Override
-    public List<Integer> getGroupsIdByStudentNumber(int number) {
-        return studentDao.getGroupsIdByStudentNumber(number);
+    public List<Integer> getGroupIdsByStudentNumber(int number) {
+        return studentDao.getGroupIdsByStudentNumber(number);
     }
 
     @Override
@@ -43,6 +47,11 @@ public class StudentsServiceImpl implements StudentsService {
     @Override
     public void saveStudents(List<Student> students) {
         studentDao.saveStudents(students);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return studentDao.getStudentsAmount() == 0;
     }
 
 }

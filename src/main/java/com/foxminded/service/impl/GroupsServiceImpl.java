@@ -4,18 +4,22 @@ import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.service.GroupsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Service
 public class GroupsServiceImpl implements GroupsService {
 
     private final GroupDao groupDao;
 
-    public GroupsServiceImpl() {
-        groupDao = new GroupDao();
+    @Autowired
+    public GroupsServiceImpl(GroupDao groupDao) {
+        this.groupDao = groupDao;
     }
 
     @Override
@@ -50,6 +54,11 @@ public class GroupsServiceImpl implements GroupsService {
     @Override
     public void saveGroups(List<Group> groups) {
         groupDao.saveGroups(groups);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return groupDao.getGroupsAmount() == 0;
     }
 
 }

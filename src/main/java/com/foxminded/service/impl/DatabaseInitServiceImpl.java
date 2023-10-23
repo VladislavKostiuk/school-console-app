@@ -1,77 +1,61 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.constants.ErrorMessages;
-import com.foxminded.constants.FileNames;
-import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.helper.TestDataGenerator;
 import com.foxminded.service.*;
-import org.apache.ibatis.jdbc.ScriptRunner;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.sql.Connection;
-import java.sql.SQLException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
+@Service
 public class DatabaseInitServiceImpl implements DatabaseInitService {
 
     private final StudentsService studentsService;
     private final CoursesService coursesService;
     private final GroupsService groupsService;
     private final StudentsCoursesService studentsCoursesService;
-    private final DaoFactory daoFactory;
     private final TestDataGenerator testDataGenerator;
     private final Random random;
 
-    public DatabaseInitServiceImpl() {
-        studentsService = new StudentsServiceImpl();
-        coursesService = new CoursesServiceImpl();
-        groupsService = new GroupsServiceImpl();
-        studentsCoursesService = new StudentsCoursesServiceImpl();
-        daoFactory = new DaoFactory();
-        testDataGenerator = new TestDataGenerator();
+    @Autowired
+    public DatabaseInitServiceImpl(StudentsService studentsService,
+                                   CoursesService coursesService,
+                                   GroupsService groupsService,
+                                   StudentsCoursesService studentsCoursesService,
+                                   TestDataGenerator testDataGenerator) {
+        this.studentsService = studentsService;
+        this.coursesService = coursesService;
+        this.groupsService = groupsService;
+        this.studentsCoursesService = studentsCoursesService;
+        this.testDataGenerator = testDataGenerator;
         random = new Random();
     }
 
     @Override
-    public void init() {
-        createTables();
-
-        List<Course> courses = testDataGenerator.generateTestCourses(10);
-        List<Group> groups = testDataGenerator.generateTestGroups(10);
-        List<Student> students = testDataGenerator.generateTestStudents(200);
+    public void init(int coursesAmount, int groupsAmount, int studentsAmount) {
+        List<Course> courses = testDataGenerator.generateTestCourses(coursesAmount);
+        List<Group> groups = testDataGenerator.generateTestGroups(groupsAmount);
+        List<Student> students = testDataGenerator.generateTestStudents(studentsAmount);
 
         assignCoursesAndGroupsToStudents(students, groups, courses);
 
-        coursesService.saveCourses(courses);
-        groupsService.saveGroups(groups);
-        studentsService.saveStudents(students);
-        studentsCoursesService.saveStudentsCourses(students);
-    }
+        if (coursesService.isEmpty()) {
+            coursesService.saveCourses(courses);
+        }
 
-    private void createTables() {
-        try (InputStream inputStream = getClass().getClassLoader()
-                .getResourceAsStream(FileNames.CREATE_TABLES_SCRIPT);
-             Reader scriptReader = new InputStreamReader(
-                     Optional.ofNullable(inputStream).orElseThrow(() ->
-                             new IllegalArgumentException(String.format(
-                                     ErrorMessages.FILE_WAS_NOT_FOUND, FileNames.CREATE_TABLES_SCRIPT
-                             ))));
-             Connection connection = daoFactory.getConnection()) {
-            ScriptRunner scriptRunner = new ScriptRunner(connection);
-            scriptRunner.setLogWriter(null);
-            scriptRunner.runScript(scriptReader);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (groupsService.isEmpty()) {
+            groupsService.saveGroups(groups);
+        }
+
+        if (studentsService.isEmpty()) {
+            studentsService.saveStudents(students);
+        }
+
+        if (studentsCoursesService.isEmpty()) {
+            studentsCoursesService.saveStudentsCourses(students);
         }
     }
 

@@ -12,4 +12,6 @@ public interface CoursesService {
 
     void saveCourses(List<Course> courses);
 
+    boolean isEmpty();
+
 }

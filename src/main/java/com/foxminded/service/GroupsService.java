@@ -18,4 +18,6 @@ public interface GroupsService {
 
     void saveGroups(List<Group> groups);
 
+    boolean isEmpty();
+
 }
