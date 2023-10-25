@@ -56,13 +56,13 @@ public class SchoolApplication {
             } else if (option.equals("b")) {
                 printStudentsByCourse(console);
             } else if (option.equals("c")) {
-                printAddingStudent(console);
+                startStudentAdding(console);
             } else if (option.equals("d")) {
-                printDeletingStudentById(console);
+                startDeletingStudentById(console);
             } else if (option.equals("e")) {
-                printAddingStudentToCourse(console);
+                startAddingStudentToCourse(console);
             } else if (option.equals("f")) {
-                printDeletingStudentFromCourse(console);
+                startDeletingStudentFromCourse(console);
             } else {
                 System.out.println("Unknown option");
             }
@@ -76,7 +76,7 @@ public class SchoolApplication {
     }
 
     public List<Student> findStudentsByCourse(CourseName courseName) {
-        int courseId = coursesService.getIdByName(courseName.toString());
+        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
         List<Integer> studentsId = studentsCoursesService.getStudentsIdByCourseId(courseId);
         Map<Student, Integer> studentsGroupIds = studentsService.getStudentsByIds(studentsId);
         List<Student> students = groupsService.setGroupToStudents(studentsGroupIds);
@@ -113,7 +113,7 @@ public class SchoolApplication {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_ALREADY_HAS_THAT_COURSE, courseName));
         }
 
-        int courseId = coursesService.getIdByName(courseName.toString());
+        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
         studentsCoursesService.addStudentToCourse(student.getId(), courseId);
     }
 
@@ -126,7 +126,7 @@ public class SchoolApplication {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_DOES_NOT_HAVE_THAT_COURSE, courseName));
         }
 
-        int courseId = coursesService.getIdByName(courseName.toString());
+        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
         return studentsCoursesService.deleteStudentFromCourse(student.getId(), courseId);
     }
 
@@ -159,7 +159,7 @@ public class SchoolApplication {
         printStudents(students);
     }
 
-    private void printAddingStudent(Scanner console) {
+    private void startStudentAdding(Scanner console) {
         System.out.println("Print student first name: ");
         String firstName = console.nextLine();
         System.out.println("Print student last name: ");
@@ -173,7 +173,7 @@ public class SchoolApplication {
         System.out.println("Student " + firstName + ", " + lastName + " was added to db");
     }
 
-    private void printDeletingStudentById(Scanner console) {
+    private void startDeletingStudentById(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
         boolean isDeleted = deleteStudentById(id);
@@ -185,7 +185,7 @@ public class SchoolApplication {
         }
     }
 
-    private void printAddingStudentToCourse(Scanner console) {
+    private void startAddingStudentToCourse(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
         Student student = getStudentById(id);
@@ -200,7 +200,7 @@ public class SchoolApplication {
         System.out.println(courseName + " was added to students courses list");
     }
 
-    private void printDeletingStudentFromCourse(Scanner console) {
+    private void startDeletingStudentFromCourse(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
         Student student = getStudentById(id);

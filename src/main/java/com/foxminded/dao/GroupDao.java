@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -22,23 +21,16 @@ public class GroupDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
-    private final RowMapper<Group> groupRowMapper;
-    private final ResultSetExtractor<Group> groupExtractor;
+    private RowMapper<Group> groupRowMapper;
+    private ResultSetExtractor<Group> groupExtractor;
 
     @Autowired
     public GroupDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
-        groupRowMapper = (resultSet, rowNum) -> extractGroup(resultSet);
-
-        groupExtractor = resultSet -> {
-            if (!resultSet.next()) {
-                throw new IllegalArgumentException(ErrorMessages.GROUP_WITH_THAT_ID_WAS_NOT_FOUND);
-            }
-
-            return extractGroup(resultSet);
-        };
+        initGroupRowMapper();
+        initGroupExtractor();
     }
 
     public void saveGroups(List<Group> groups) {
@@ -86,6 +78,20 @@ public class GroupDao {
 
     public boolean deleteGroupById(int id) {
         return jdbcTemplate.update("DELETE FROM groups WHERE group_id = ?", id) != 0;
+    }
+
+    private void initGroupExtractor() {
+        groupExtractor = resultSet -> {
+            if (!resultSet.next()) {
+                throw new IllegalArgumentException(ErrorMessages.GROUP_WITH_THAT_ID_WAS_NOT_FOUND);
+            }
+
+            return extractGroup(resultSet);
+        };
+    }
+
+    private void initGroupRowMapper() {
+        groupRowMapper = (resultSet, rowNum) -> extractGroup(resultSet);
     }
 
     private Group extractGroup(ResultSet resultSet) {

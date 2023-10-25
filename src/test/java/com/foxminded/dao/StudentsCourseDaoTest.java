@@ -1,11 +1,9 @@
 package com.foxminded.dao;
 
 import com.foxminded.AbstractPostgreSQLTestContainer;
-import net.bytebuddy.asm.MemberSubstitution;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
@@ -29,17 +27,17 @@ class StudentsCourseDaoTest extends AbstractPostgreSQLTestContainer {
         studentsCourseDao.deleteStudentFromCourse(1, 1);
         studentsCourseDao.deleteStudentFromCourse(1, 3);
 
-        assertEquals(new HashSet(List.of(1, 2, 3)), new HashSet<>(courseIds));
+        assertEquals(new HashSet<>(List.of(1, 2, 3)), new HashSet<>(courseIds));
     }
 
     @Test
     void testGetStudentsIdByCourseId_Success() {
-        assertEquals(List.of(1, 2), studentsCourseDao.getStudentsIdByCourseId(2));
+        assertEquals(List.of(1, 2), studentsCourseDao.getStudentIdsByCourseId(2));
     }
 
     @Test
     void testGetStudentsIdByCourseId_NoStudentIdsWithSuchCourseId() {
-        assertThrows(IllegalArgumentException.class, () -> studentsCourseDao.getStudentsIdByCourseId(100));
+        assertThrows(IllegalArgumentException.class, () -> studentsCourseDao.getStudentIdsByCourseId(100));
     }
 
     @Test

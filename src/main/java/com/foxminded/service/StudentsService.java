@@ -17,8 +17,4 @@ public interface StudentsService {
 
     Map<Student, Integer> getStudentById(int id);
 
-    void saveStudents(List<Student> students);
-
-    boolean isEmpty();
-
 }

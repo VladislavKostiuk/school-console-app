@@ -1,5 +1,9 @@
 package com.foxminded.service.impl;
 
+import com.foxminded.dao.CourseDao;
+import com.foxminded.dao.GroupDao;
+import com.foxminded.dao.StudentDao;
+import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
@@ -7,29 +11,30 @@ import com.foxminded.helper.TestDataGenerator;
 import com.foxminded.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 @Service
 public class DatabaseInitServiceImpl implements DatabaseInitService {
 
-    private final StudentsService studentsService;
-    private final CoursesService coursesService;
-    private final GroupsService groupsService;
-    private final StudentsCoursesService studentsCoursesService;
+    private final StudentDao studentDao;
+    private final CourseDao courseDao;
+    private final GroupDao groupDao;
+    private final StudentsCourseDao studentsCourseDao;
     private final TestDataGenerator testDataGenerator;
     private final Random random;
 
     @Autowired
-    public DatabaseInitServiceImpl(StudentsService studentsService,
-                                   CoursesService coursesService,
-                                   GroupsService groupsService,
-                                   StudentsCoursesService studentsCoursesService,
+    public DatabaseInitServiceImpl(StudentDao studentDao,
+                                   CourseDao courseDao,
+                                   GroupDao groupDao,
+                                   StudentsCourseDao studentsCourseDao,
                                    TestDataGenerator testDataGenerator) {
-        this.studentsService = studentsService;
-        this.coursesService = coursesService;
-        this.groupsService = groupsService;
-        this.studentsCoursesService = studentsCoursesService;
+        this.studentDao = studentDao;
+        this.courseDao = courseDao;
+        this.groupDao = groupDao;
+        this.studentsCourseDao = studentsCourseDao;
         this.testDataGenerator = testDataGenerator;
         random = new Random();
     }
@@ -42,20 +47,27 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
 
         assignCoursesAndGroupsToStudents(students, groups, courses);
 
-        if (coursesService.isEmpty()) {
-            coursesService.saveCourses(courses);
+        if (courseDao.getCoursesAmount() == 0) {
+            courseDao.saveCourses(courses);
         }
 
-        if (groupsService.isEmpty()) {
-            groupsService.saveGroups(groups);
+        if (groupDao.getGroupsAmount() == 0) {
+            groupDao.saveGroups(groups);
         }
 
-        if (studentsService.isEmpty()) {
-            studentsService.saveStudents(students);
+        if (studentDao.getStudentsAmount() == 0) {
+            studentDao.saveStudents(students);
         }
 
-        if (studentsCoursesService.isEmpty()) {
-            studentsCoursesService.saveStudentsCourses(students);
+        if (studentsCourseDao.getStudentCoursesAmount() == 0) {
+            List<int[]> studentsCourses = new ArrayList<>();
+            for (var student : students) {
+                for (var course : student.getCourses()) {
+                    studentsCourses.add(new int[] {student.getId(), course.getId()});
+                }
+            }
+
+            studentsCourseDao.saveStudentsCourses(studentsCourses);
         }
     }
 

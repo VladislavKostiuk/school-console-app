@@ -3,16 +3,12 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.CourseDao;
 import com.foxminded.domain.Course;
 import com.foxminded.enums.CourseName;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.util.List;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,17 +21,15 @@ class CoursesServiceImplTest {
     CourseDao courseDao;
 
     @Test
-    void testGetIdByName_Success() {
-        doReturn(Optional.of(1)).when(courseDao).getIdByName("someName");
-        assertEquals(1, coursesService.getIdByName("someName"));
-        verify(courseDao, times(1)).getIdByName("someName");
-    }
+    void testGetCourseByName_Success() {
+        String courseName = CourseName.ART.toString();
+        Course course1 = new Course();
+        course1.setId(1);
+        course1.setName(CourseName.ART);
 
-    @Test
-    void testGetIdByName_NoCourseWithSuchName() {
-        doReturn(Optional.empty()).when(courseDao).getIdByName("nonExistingName");
-        assertThrows(IllegalArgumentException.class, () -> coursesService.getIdByName("nonExistingName"));
-        verify(courseDao, times(1)).getIdByName("nonExistingName");
+        doReturn(course1).when(courseDao).getCourseByName(courseName);
+        assertEquals(course1, coursesService.getCourseByName(courseName));
+        verify(courseDao, times(1)).getCourseByName(courseName);
     }
 
     @Test
@@ -54,24 +48,6 @@ class CoursesServiceImplTest {
 
         assertEquals(expectedList, actualList);
         verify(courseDao, times(1)).getCoursesByIds(List.of(1, 2));
-    }
-
-    @Test
-    void testSaveCourses_Success() {
-       List<Course> courseList = List.of(new Course());
-       coursesService.saveCourses(courseList);
-       verify(courseDao, times(1)).saveCourses(courseList);
-    }
-
-    @Test
-    void testIsEmpty_Success() {
-        doReturn(0).when(courseDao).getCoursesAmount();
-        assertTrue(coursesService.isEmpty());
-        verify(courseDao, times(1)).getCoursesAmount();
-
-        doReturn(3).when(courseDao).getCoursesAmount();
-        assertFalse(coursesService.isEmpty());
-        verify(courseDao, times(2)).getCoursesAmount();
     }
 
 }

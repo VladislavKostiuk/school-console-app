@@ -7,6 +7,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,19 +41,14 @@ public class StudentsCourseDao {
 
     }
 
-    public List<Integer> getStudentsIdByCourseId(int courseId) {
+    public List<Integer> getStudentIdsByCourseId(int courseId) {
         return jdbcTemplate.query("SELECT student_id FROM students_courses WHERE course_id = ?",
                 resultSet -> {
                     if (!resultSet.isBeforeFirst()) {
                         throw new IllegalArgumentException(ErrorMessages.STUDENT_ID_WAS_NOT_FOUND);
                     }
 
-                    List<Integer> studentIds = new ArrayList<>();
-                    while (resultSet.next()) {
-                        studentIds.add(resultSet.getInt(1));
-                    }
-
-                    return studentIds;
+                    return getIdListFromResultSet(resultSet);
                 } , courseId);
     }
 
@@ -67,12 +63,7 @@ public class StudentsCourseDao {
                         throw new IllegalArgumentException(ErrorMessages.COURSE_ID_WAS_NOT_FOUND);
                     }
 
-                    List<Integer> studentIds = new ArrayList<>();
-                    while (resultSet.next()) {
-                        studentIds.add(resultSet.getInt(1));
-                    }
-
-                    return studentIds;
+                    return getIdListFromResultSet(resultSet);
                 }, studentId);
     }
 
@@ -87,6 +78,20 @@ public class StudentsCourseDao {
 
     public int getStudentCoursesAmount() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM students_courses", Integer.class);
+    }
+
+    private List<Integer> getIdListFromResultSet(ResultSet resultSet) {
+        List<Integer> studentIds = new ArrayList<>();
+
+        try {
+            while (resultSet.next()) {
+                studentIds.add(resultSet.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return studentIds;
     }
 
 }

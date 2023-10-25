@@ -87,23 +87,4 @@ class GroupsServiceImplTest {
         verify(groupDao).getGroupByName("someName");
     }
 
-    @Test
-    void saveGroups_Success() {
-        List<Group> groupList = List.of(new Group(), new Group());
-
-        groupsService.saveGroups(groupList);
-        verify(groupDao, times(1)).saveGroups(groupList);
-    }
-
-    @Test
-    void testIsEmpty_Success() {
-        doReturn(0).when(groupDao).getGroupsAmount();
-        assertTrue(groupsService.isEmpty());
-        verify(groupDao, times(1)).getGroupsAmount();
-
-        doReturn(3).when(groupDao).getGroupsAmount();
-        assertFalse(groupsService.isEmpty());
-        verify(groupDao, times(2)).getGroupsAmount();
-    }
-
 }

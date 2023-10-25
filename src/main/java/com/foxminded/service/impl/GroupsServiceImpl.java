@@ -6,7 +6,6 @@ import com.foxminded.domain.Student;
 import com.foxminded.service.GroupsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,16 +48,6 @@ public class GroupsServiceImpl implements GroupsService {
     @Override
     public Group getGroupByName(String name) {
         return groupDao.getGroupByName(name);
-    }
-
-    @Override
-    public void saveGroups(List<Group> groups) {
-        groupDao.saveGroups(groups);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return groupDao.getGroupsAmount() == 0;
     }
 
 }

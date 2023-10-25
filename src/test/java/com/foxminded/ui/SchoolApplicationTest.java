@@ -99,7 +99,7 @@ class SchoolApplicationTest {
     @Test
     void testFindStudentsByCourse_Success() {
         CourseName testCourseName = CourseName.ART;
-        when(coursesService.getIdByName(testCourseName.toString())).thenReturn(1);
+        when(coursesService.getCourseByName(testCourseName.toString())).thenReturn(testCourses.get(0));
         List<Integer> studentIdList = List.of(1, 2);
         when(studentsCoursesService.getStudentsIdByCourseId(1)).thenReturn(studentIdList);
         when(studentsService.getStudentsByIds(studentIdList)).thenReturn(testStudentGroupId);
@@ -107,7 +107,7 @@ class SchoolApplicationTest {
 
         List<Student> actualStudents = schoolApplication.findStudentsByCourse(testCourseName);
         assertEquals(testStudents, actualStudents);
-        verify(coursesService, times(1)).getIdByName(testCourseName.toString());
+        verify(coursesService, times(1)).getCourseByName(testCourseName.toString());
         verify(studentsCoursesService, times(1)).getStudentsIdByCourseId(1);
         verify(studentsService, times(1)).getStudentsByIds(studentIdList);
         verify(groupsService, times(1)).setGroupToStudents(testStudentGroupId);
@@ -163,10 +163,13 @@ class SchoolApplicationTest {
         Student testStudent = testStudents.get(0);
         testStudent.setCourses(testCourses);
         String testCourseName = CourseName.MEDICINE.toString();
-        when(coursesService.getIdByName(testCourseName)).thenReturn(4);
+        Course testCourse = new Course();
+        testCourse.setId(4);
+        testCourse.setName(CourseName.MEDICINE);
+        when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourse);
 
         schoolApplication.addStudentToCourse(testStudent, testCourseName);
-        verify(coursesService, times(1)).getIdByName(testCourseName);
+        verify(coursesService, times(1)).getCourseByName(testCourseName);
         verify(studentsCoursesService, times(1)).addStudentToCourse(testStudent.getId(), 4);
     }
 
@@ -190,7 +193,7 @@ class SchoolApplicationTest {
         String testCourseName = CourseName.ART.toString();
         int coursesAmountBeforeDelete = testCourses.size();
 
-        when(coursesService.getIdByName(testCourseName)).thenReturn(1);
+        when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourses.get(0));
         when(studentsCoursesService.deleteStudentFromCourse(testStudent.getId(), 1)).then(invocationOnMock -> {
             testStudent.getCourses().remove(1);
             return true;
@@ -198,7 +201,7 @@ class SchoolApplicationTest {
         assertTrue(schoolApplication.deleteStudentFromCourse(testStudent, testCourseName));
         assertNotEquals(coursesAmountBeforeDelete, testCourses.size());
 
-        verify(coursesService, times(1)).getIdByName(testCourseName);
+        verify(coursesService, times(1)).getCourseByName(testCourseName);
         verify(studentsCoursesService, times(1)).deleteStudentFromCourse(testStudent.getId(), 1);
     }
 

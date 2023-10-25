@@ -1,5 +1,9 @@
 package com.foxminded.service.impl;
 
+import com.foxminded.dao.CourseDao;
+import com.foxminded.dao.GroupDao;
+import com.foxminded.dao.StudentDao;
+import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
@@ -29,13 +33,13 @@ class DatabaseInitServiceImplTest {
     @InjectMocks
     private DatabaseInitServiceImpl databaseInitService;
     @Mock
-    private StudentsService studentsService;
+    private StudentDao studentDao;
     @Mock
-    private CoursesService coursesService;
+    private CourseDao courseDao;
     @Mock
-    private GroupsService groupsService;
+    private GroupDao groupDao;
     @Mock
-    private StudentsCoursesService studentsCoursesService;
+    private StudentsCourseDao studentsCourseDao;
     @Mock
     private TestDataGenerator testDataGenerator;
     private List<Course> testCourses;
@@ -86,10 +90,10 @@ class DatabaseInitServiceImplTest {
         when(testDataGenerator.generateTestCourses(3)).thenReturn(testCourses);
         when(testDataGenerator.generateTestGroups(2)).thenReturn(testGroups);
         when(testDataGenerator.generateTestStudents(2)).thenReturn(testStudents);
-        when(groupsService.isEmpty()).thenReturn(true);
-        when(coursesService.isEmpty()).thenReturn(true);
-        when(studentsService.isEmpty()).thenReturn(true);
-        when(studentsCoursesService.isEmpty()).thenReturn(true);
+        when(groupDao.getGroupsAmount()).thenReturn(0);
+        when(courseDao.getCoursesAmount()).thenReturn(0);
+        when(studentDao.getStudentsAmount()).thenReturn(0);
+        when(studentsCourseDao.getStudentCoursesAmount()).thenReturn(0);
 
         databaseInitService.init(3, 2, 2);
 
@@ -97,15 +101,15 @@ class DatabaseInitServiceImplTest {
         verify(testDataGenerator, times(1)).generateTestGroups(2);
         verify(testDataGenerator, times(1)).generateTestStudents(2);
 
-        verify(coursesService, times(1)).isEmpty();
-        verify(groupsService, times(1)).isEmpty();
-        verify(studentsService, times(1)).isEmpty();
-        verify(studentsCoursesService, times(1)).isEmpty();
+        verify(groupDao, times(1)).getGroupsAmount();
+        verify(courseDao, times(1)).getCoursesAmount();
+        verify(studentDao, times(1)).getStudentsAmount();
+        verify(studentsCourseDao, times(1)).getStudentCoursesAmount();
 
-        verify(coursesService, times(1)).saveCourses(testCourses);
-        verify(groupsService, times(1)).saveGroups(testGroups);
-        verify(studentsService, times(1)).saveStudents(testStudents);
-        verify(studentsCoursesService, times(1)).saveStudentsCourses(testStudents);
+        verify(groupDao, times(1)).saveGroups(testGroups);
+        verify(courseDao, times(1)).saveCourses(testCourses);
+        verify(studentDao, times(1)).saveStudents(testStudents);
+        verify(studentsCourseDao, times(1)).saveStudentsCourses(anyList());
 
         for (var student : testStudents) {
             assertNotNull(student.getGroup());

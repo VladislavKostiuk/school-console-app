@@ -6,12 +6,8 @@ import java.util.List;
 
 public interface CoursesService {
 
-    int getIdByName(String name);
+    Course getCourseByName(String name);
 
     List<Course> getCoursesByIds(List<Integer> ids);
-
-    void saveCourses(List<Course> courses);
-
-    boolean isEmpty();
 
 }

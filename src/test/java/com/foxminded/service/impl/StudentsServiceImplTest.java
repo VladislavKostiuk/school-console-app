@@ -86,22 +86,4 @@ class StudentsServiceImplTest {
         assertEquals(student, actualStudent);
     }
 
-    @Test
-    public void testSaveStudents_Success() {
-        List<Student> studentList = List.of(testStudent);
-        studentsService.saveStudents(studentList);
-        verify(studentDao, times(1)).saveStudents(studentList);
-    }
-
-    @Test
-    public void testIsEmpty_Success() {
-        doReturn(0).when(studentDao).getStudentsAmount();
-        assertTrue(studentsService.isEmpty());
-        verify(studentDao, times(1)).getStudentsAmount();
-
-        doReturn(3).when(studentDao).getStudentsAmount();
-        assertFalse(studentsService.isEmpty());
-        verify(studentDao, times(2)).getStudentsAmount();
-    }
-
 }

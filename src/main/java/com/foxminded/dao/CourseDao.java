@@ -7,39 +7,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class CourseDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
-    private final ResultSetExtractor<Course> courseExtractor;
+    private ResultSetExtractor<Course> courseExtractor;
+    private RowMapper<Course> courseRowMapper;
 
     @Autowired
     public CourseDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
-        courseExtractor = resultSet -> {
-            if (!resultSet.next()) {
-                throw new IllegalArgumentException(ErrorMessages.COURSE_WITH_THAT_ID_WAS_NOT_FOUND);
-            }
-
-            Course course = new Course();
-            course.setId(resultSet.getInt("course_id"));
-            course.setName(CourseName.valueOf(resultSet.getString("course_name")));
-            course.setDescription(resultSet.getString("course_description"));
-            return course;
-        };
+        initCourseExtractor();
+        initCourseRowMapper();
     }
 
     public void saveCourses(List<Course> courses) {
@@ -62,21 +54,15 @@ public class CourseDao {
         return jdbcTemplate.query("SELECT * FROM courses WHERE course_id = ?", courseExtractor, id);
     }
 
-    public Optional<Integer> getIdByName(String name) {
-        return Optional.ofNullable(jdbcTemplate.queryForObject("SELECT course_id FROM courses " +
-                "WHERE course_name = ?", Integer.class, name));
+    public Course getCourseByName(String name) {
+        return jdbcTemplate.query("SELECT * FROM courses WHERE course_name = ?", courseExtractor, name);
     }
 
     public List<Course> getCoursesByIds(List<Integer> courseIds) {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", courseIds);
-        List<Course> courses = namedParamJdbcTemplate.query("SELECT * FROM courses WHERE course_id IN (:ids)", parameterSource,(resultSet, rowNum) -> {
-            Course course = new Course();
-            course.setId(resultSet.getInt("course_id"));
-            course.setName(CourseName.valueOf(resultSet.getString("course_name")));
-            course.setDescription(resultSet.getString("course_description"));
-            return course;
-        });
+        List<Course> courses = namedParamJdbcTemplate.query("SELECT * FROM courses WHERE course_id IN (:ids)",
+                parameterSource, courseRowMapper);
 
         if (courses.size() != courseIds.size()) {
             throw new IllegalArgumentException(ErrorMessages.SOME_COURSES_WAS_NOT_FOUND);
@@ -87,6 +73,32 @@ public class CourseDao {
 
     public int getCoursesAmount() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM courses", Integer.class);
+    }
+
+    private void initCourseExtractor() {
+        courseExtractor = resultSet -> {
+            if (!resultSet.next()) {
+                throw new IllegalArgumentException(ErrorMessages.COURSE_WITH_THAT_PARAM_WAS_NOT_FOUND);
+            }
+
+            return mapCourse(resultSet);
+        };
+    }
+
+    private void initCourseRowMapper() {
+        courseRowMapper = (resultSet, rowNum) -> mapCourse(resultSet);
+    }
+
+    private Course mapCourse(ResultSet resultSet) {
+        Course course = new Course();
+        try {
+            course.setId(resultSet.getInt("course_id"));
+            course.setName(CourseName.valueOf(resultSet.getString("course_name")));
+            course.setDescription(resultSet.getString("course_description"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return course;
     }
 
 }

@@ -62,10 +62,21 @@ class CourseDaoTest extends AbstractPostgreSQLTestContainer {
     }
 
     @Test
-    void testGetIdByName_Success() {
-        int id = courseDao.getIdByName("ART").get();
-        assertEquals(1, id);
+    void testGetCourseByName_Success() {
+        Course expected = new Course();
+        expected.setId(1);
+        expected.setName(CourseName.ART);
+        expected.setDescription("desc1");
+
+        Course actual = courseDao.getCourseByName(CourseName.ART.toString());
+        assertEquals(expected, actual);
     }
+
+    @Test
+    void testGetCourseByName_NoCourseWithSuchName() {
+        assertThrows(IllegalArgumentException.class, () -> courseDao.getCourseByName("non-existent course name"));
+    }
+
 
     @Test
     void testGetCoursesByIds() {

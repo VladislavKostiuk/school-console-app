@@ -16,8 +16,4 @@ public interface GroupsService {
 
     Group getGroupByName(String name);
 
-    void saveGroups(List<Group> groups);
-
-    boolean isEmpty();
-
 }

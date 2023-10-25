@@ -44,14 +44,4 @@ public class StudentsServiceImpl implements StudentsService {
         return studentDao.getStudentById(id);
     }
 
-    @Override
-    public void saveStudents(List<Student> students) {
-        studentDao.saveStudents(students);
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return studentDao.getStudentsAmount() == 0;
-    }
-
 }

@@ -18,29 +18,14 @@ public class StudentDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
-    private final ResultSetExtractor<Map<Student, Integer>> studentExtractor;
+    private ResultSetExtractor<Map<Student, Integer>> studentExtractor;
 
     @Autowired
     public StudentDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 
-        studentExtractor = resultSet -> {
-            if (!resultSet.isBeforeFirst()) {
-                throw new IllegalArgumentException(ErrorMessages.STUDENT_WITH_THAT_ID_WAS_NOT_FOUND);
-            }
-
-            Map<Student, Integer> studentsGroupIds = new HashMap<>();
-            while (resultSet.next()) {
-                Student student = new Student();
-                student.setId(resultSet.getInt("student_id"));
-                student.setFirstName(resultSet.getString("first_name"));
-                student.setLastName(resultSet.getString("last_name"));
-                int groupId = resultSet.getInt("group_id");
-                studentsGroupIds.put(student, groupId);
-            }
-            return studentsGroupIds;
-        };
+        initStudentExtractor();
     }
 
     public void saveStudents(List<Student> students) {
@@ -94,6 +79,25 @@ public class StudentDao {
 
     public int getStudentsAmount() {
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM students", Integer.class);
+    }
+
+    private void initStudentExtractor() {
+        studentExtractor = resultSet -> {
+            if (!resultSet.isBeforeFirst()) {
+                throw new IllegalArgumentException(ErrorMessages.STUDENT_WITH_THAT_ID_WAS_NOT_FOUND);
+            }
+
+            Map<Student, Integer> studentsGroupIds = new HashMap<>();
+            while (resultSet.next()) {
+                Student student = new Student();
+                student.setId(resultSet.getInt("student_id"));
+                student.setFirstName(resultSet.getString("first_name"));
+                student.setLastName(resultSet.getString("last_name"));
+                int groupId = resultSet.getInt("group_id");
+                studentsGroupIds.put(student, groupId);
+            }
+            return studentsGroupIds;
+        };
     }
 
 }

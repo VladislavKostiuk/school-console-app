@@ -1,8 +1,6 @@
 package com.foxminded.service.impl;
 
 import com.foxminded.dao.StudentsCourseDao;
-import com.foxminded.domain.Course;
-import com.foxminded.domain.Student;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,9 +21,9 @@ class StudentsCoursesServiceImplTest {
     @Test
     void testGetStudentsIdByCourseId_Success() {
         List<Integer> studentIds = List.of(1, 2, 3);
-        when(studentsCourseDao.getStudentsIdByCourseId(1)).thenReturn(studentIds);
+        when(studentsCourseDao.getStudentIdsByCourseId(1)).thenReturn(studentIds);
         assertEquals(studentIds, studentsCoursesService.getStudentsIdByCourseId(1));
-        verify(studentsCourseDao, times(1)).getStudentsIdByCourseId(1);
+        verify(studentsCourseDao, times(1)).getStudentIdsByCourseId(1);
     }
 
     @Test
@@ -56,36 +54,6 @@ class StudentsCoursesServiceImplTest {
         boolean result = studentsCoursesService.deleteStudentFromCourse(1, 1);
         assertTrue(result);
         verify(studentsCourseDao, times(1)).deleteStudentFromCourse(1, 1);
-    }
-
-    @Test
-    void saveStudentsCourses_Success() {
-        Course course = new Course();
-        course.setId(1);
-
-        Student student1 = new Student();
-        student1.setId(1);
-        student1.setCourses(List.of(course));
-
-        Student student2 = new Student();
-        student2.setId(2);
-        student2.setCourses(List.of(course));
-
-        List<Student> students = List.of(student1, student2);
-
-        studentsCoursesService.saveStudentsCourses(students);
-        verify(studentsCourseDao).saveStudentsCourses(anyList());
-    }
-
-    @Test
-    void testIsEmpty_Success() {
-        doReturn(0).when(studentsCourseDao).getStudentCoursesAmount();
-        assertTrue(studentsCoursesService.isEmpty());
-        verify(studentsCourseDao, times(1)).getStudentCoursesAmount();
-
-        doReturn(3).when(studentsCourseDao).getStudentCoursesAmount();
-        assertFalse(studentsCoursesService.isEmpty());
-        verify(studentsCourseDao, times(2)).getStudentCoursesAmount();
     }
 
 }
