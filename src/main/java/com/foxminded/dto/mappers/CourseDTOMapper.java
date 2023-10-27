@@ -5,6 +5,7 @@ import com.foxminded.dto.CourseDTO;
 import com.foxminded.enums.CourseName;
 
 public class CourseDTOMapper {
+
     public CourseDTO mapToCourseDTO(Course course) {
         return new CourseDTO (
                 course.getId(),
@@ -12,4 +13,5 @@ public class CourseDTOMapper {
                 course.getDescription()
         );
     }
+
 }

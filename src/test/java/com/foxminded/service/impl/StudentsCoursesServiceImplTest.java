@@ -14,9 +14,9 @@ import static org.mockito.Mockito.*;
 class StudentsCoursesServiceImplTest {
 
     @InjectMocks
-    StudentsCoursesServiceImpl studentsCoursesService;
+    private StudentsCoursesServiceImpl studentsCoursesService;
     @Mock
-    StudentsCourseDao studentsCourseDao;
+    private StudentsCourseDao studentsCourseDao;
 
     @Test
     void testGetStudentsIdByCourseId_Success() {

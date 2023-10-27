@@ -6,6 +6,7 @@ import com.foxminded.dto.StudentDTO;
 import java.util.List;
 
 public class StudentCourseDTOMapper {
+
     public StudentCourseDTO mapToStudentCourseDTO(StudentDTO studentDTO, List<String> courses) {
         return new StudentCourseDTO(
                 studentDTO.id(),
@@ -15,4 +16,5 @@ public class StudentCourseDTOMapper {
                 courses
         );
     }
+
 }

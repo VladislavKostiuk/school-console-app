@@ -12,6 +12,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.toList;
 
 public class StudentDTOMapper {
+
     public List<StudentDTO> mapToStudentDTOList(Map<Student, Integer> studentGroupId) {
         List<StudentDTO> studentDTOList = new ArrayList<>();
 
@@ -28,4 +29,5 @@ public class StudentDTOMapper {
 
         return studentDTOList;
     }
+
 }

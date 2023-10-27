@@ -27,9 +27,9 @@ import static org.mockito.Mockito.*;
 class GroupsServiceImplTest {
 
     @InjectMocks
-    GroupsServiceImpl groupsService;
+    private GroupsServiceImpl groupsService;
     @Mock
-    GroupDao groupDao;
+    private GroupDao groupDao;
     private GroupDTOMapper groupMapper;
 
     @BeforeEach

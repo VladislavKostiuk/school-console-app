@@ -19,9 +19,9 @@ import static org.mockito.Mockito.*;
 class CoursesServiceImplTest {
 
     @InjectMocks
-    CoursesServiceImpl coursesService;
+    private CoursesServiceImpl coursesService;
     @Mock
-    CourseDao courseDao;
+    private CourseDao courseDao;
     private CourseDTOMapper courseMapper;
 
     @BeforeEach
