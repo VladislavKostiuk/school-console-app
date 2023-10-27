@@ -3,6 +3,10 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.StudentDao;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
+import com.foxminded.dto.StudentCourseDTO;
+import com.foxminded.dto.StudentDTO;
+import com.foxminded.dto.mappers.StudentCourseDTOMapper;
+import com.foxminded.dto.mappers.StudentDTOMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +28,12 @@ class StudentsServiceImplTest {
     private StudentsServiceImpl studentsService;
     @Mock
     private StudentDao studentDao;
+    private StudentDTOMapper studentMapper;
     private Student testStudent;
 
     @BeforeEach
     void setUp() {
+        studentMapper = new StudentDTOMapper();
         testStudent = new Student();
         testStudent.setId(1);
         testStudent.setFirstName("firstName");
@@ -48,14 +54,15 @@ class StudentsServiceImplTest {
         Student testStudent2 = new Student();
         testStudent2.setId(2);
 
-        Map<Student, Integer> students = new HashMap<>();
-        students.put(testStudent, 1);
-        students.put(testStudent2, 2);
+        Map<Student, Integer> studentsMap = new HashMap<>();
+        studentsMap.put(testStudent, 1);
+        studentsMap.put(testStudent2, 2);
 
         List<Integer> idList = List.of(1, 2);
 
-        when(studentDao.getStudentsByIds(idList)).thenReturn(students);
-        assertEquals(students, studentsService.getStudentsByIds(idList));
+        when(studentDao.getStudentsByIds(idList)).thenReturn(studentsMap);
+        List<StudentDTO> expectedStudentList = studentMapper.mapToStudentDTOList(studentsMap);
+        assertEquals(expectedStudentList, studentsService.getStudentsByIds(idList));
         verify(studentDao, times(1)).getStudentsByIds(idList);
     }
 
@@ -79,11 +86,11 @@ class StudentsServiceImplTest {
 
     @Test
     public void testGetStudentById_Success() {
-        Map<Student, Integer> student = new HashMap<>();
-        student.put(testStudent, 1);
-        when(studentDao.getStudentById(1)).thenReturn(student);
-        Map<Student, Integer> actualStudent = studentsService.getStudentById(1);
-        assertEquals(student, actualStudent);
+        Map<Student, Integer> studentMap = new HashMap<>();
+        studentMap.put(testStudent, 1);
+        when(studentDao.getStudentById(1)).thenReturn(studentMap);
+        StudentDTO expectedStudent = studentMapper.mapToStudentDTOList(studentMap).get(0);
+        assertEquals(expectedStudent, studentsService.getStudentById(1));
     }
 
 }

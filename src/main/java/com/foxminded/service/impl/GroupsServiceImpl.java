@@ -3,6 +3,10 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
+import com.foxminded.dto.GroupDTO;
+import com.foxminded.dto.StudentDTO;
+import com.foxminded.dto.mappers.GroupDTOMapper;
+import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.service.GroupsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,30 +15,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 public class GroupsServiceImpl implements GroupsService {
 
     private final GroupDao groupDao;
+    private final GroupDTOMapper groupMapper;
+    private final StudentDTOMapper studentMapper;
 
     @Autowired
     public GroupsServiceImpl(GroupDao groupDao) {
         this.groupDao = groupDao;
+        groupMapper = new GroupDTOMapper();
+        studentMapper = new StudentDTOMapper();
     }
 
     @Override
-    public List<Group> getGroupsByIds(List<Integer> ids) {
-        return groupDao.getGroupsByIds(ids);
-    }
-
-    @Override
-    public List<Student> setGroupToStudents(Map<Student, Integer> studentsGroupIds) {
-        for (var entry : studentsGroupIds.entrySet()) {
-            Group group = groupDao.getGroupById(entry.getValue());
-            Student student = entry.getKey();
-            student.setGroup(group);
-        }
-
-        return new ArrayList<>(studentsGroupIds.keySet());
+    public List<GroupDTO> getGroupsByIds(List<Integer> ids) {
+        return groupDao.getGroupsByIds(ids)
+                .stream()
+                .map(groupMapper::mapToGroupDTO)
+                .collect(toList());
     }
 
     @Override
@@ -46,8 +48,8 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     @Override
-    public Group getGroupByName(String name) {
-        return groupDao.getGroupByName(name);
+    public GroupDTO getGroupByName(String name) {
+        return groupMapper.mapToGroupDTO(groupDao.getGroupByName(name));
     }
 
 }

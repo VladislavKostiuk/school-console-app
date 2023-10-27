@@ -1,5 +1,13 @@
 package com.foxminded.ui;
 
+import com.foxminded.dto.CourseDTO;
+import com.foxminded.dto.GroupDTO;
+import com.foxminded.dto.StudentCourseDTO;
+import com.foxminded.dto.StudentDTO;
+import com.foxminded.dto.mappers.CourseDTOMapper;
+import com.foxminded.dto.mappers.GroupDTOMapper;
+import com.foxminded.dto.mappers.StudentCourseDTOMapper;
+import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.enums.CourseName;
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Course;
@@ -15,6 +23,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Component
 public class SchoolApplication {
 
@@ -22,6 +32,10 @@ public class SchoolApplication {
     private final GroupsService groupsService;
     private final StudentsCoursesService studentsCoursesService;
     private final StudentsService studentsService;
+    private final CourseDTOMapper courseMapper;
+    private final GroupDTOMapper groupMapper;
+    private final StudentDTOMapper studentMapper;
+    private final StudentCourseDTOMapper studentCourseMapper;
 
     @Autowired
     public SchoolApplication(CoursesService coursesService,
@@ -34,6 +48,10 @@ public class SchoolApplication {
         this.studentsCoursesService = studentsCoursesService;
         this.studentsService = studentsService;
         initService.init(10, 10, 200);
+        courseMapper = new CourseDTOMapper();
+        groupMapper = new GroupDTOMapper();
+        studentMapper = new StudentDTOMapper();
+        studentCourseMapper = new StudentCourseDTOMapper();
     }
 
     public void showMenu() {
@@ -69,18 +87,16 @@ public class SchoolApplication {
         }
     }
 
-    public List<Group> findGroupsByNumber(int number) {
+    public List<GroupDTO> findGroupsByNumber(int number) {
         List<Integer> groupIds = studentsService.getGroupIdsByStudentNumber(number);
         return groupIds.isEmpty() ? new ArrayList<>()
                 : groupsService.getGroupsByIds(groupIds);
     }
 
-    public List<Student> findStudentsByCourse(CourseName courseName) {
-        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
-        List<Integer> studentsId = studentsCoursesService.getStudentsIdByCourseId(courseId);
-        Map<Student, Integer> studentsGroupIds = studentsService.getStudentsByIds(studentsId);
-        List<Student> students = groupsService.setGroupToStudents(studentsGroupIds);
-        return students;
+    public List<StudentDTO> findStudentsByCourse(CourseName courseName) {
+        CourseDTO course = coursesService.getCourseByName(courseName.toString());
+        List<Integer> studentsId = studentsCoursesService.getStudentsIdByCourseId(course.id());
+        return studentsService.getStudentsByIds(studentsId);
     }
 
     public void addStudent(String firstName, String lastName, String groupName) {
@@ -95,8 +111,8 @@ public class SchoolApplication {
             throw new IllegalArgumentException(String.format(ErrorMessages.GROUP_DOES_NOT_EXIST, groupName));
         }
 
-        int groupId = groupsService.getGroupByName(groupName).getId();
-        studentsService.saveStudent(firstName, lastName, groupId);
+        GroupDTO group = groupsService.getGroupByName(groupName);
+        studentsService.saveStudent(firstName, lastName, group.id());
     }
 
     public boolean deleteStudentById(int id) {
@@ -104,49 +120,45 @@ public class SchoolApplication {
         return studentsService.deleteStudentById(id);
     }
 
-    public void addStudentToCourse(Student student, String stringCourseName) {
+    public void addStudentToCourse(StudentCourseDTO student, String stringCourseName) {
         CourseName courseName = convertStringToCourseName(stringCourseName);
-        List<Course> studentCourses = student.getCourses();
-        List<CourseName> courseNames = studentCourses.stream().map(Course::getName).collect(Collectors.toList());
+        List<String> studentCourses = student.courses();
 
-        if (courseNames.contains(courseName)) {
+        if (studentCourses.contains(stringCourseName)) {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_ALREADY_HAS_THAT_COURSE, courseName));
         }
 
-        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
-        studentsCoursesService.addStudentToCourse(student.getId(), courseId);
+        CourseDTO course = coursesService.getCourseByName(courseName.toString());
+        studentsCoursesService.addStudentToCourse(student.id(), course.id());
     }
 
-    public boolean deleteStudentFromCourse(Student student, String stringCourseName) {
+    public boolean deleteStudentFromCourse(StudentCourseDTO student, String stringCourseName) {
         CourseName courseName = convertStringToCourseName(stringCourseName);
-        List<Course> studentCourses = student.getCourses();
-        List<CourseName> courseNames = studentCourses.stream().map(Course::getName).collect(Collectors.toList());
+        List<String> studentCourses = student.courses();
 
-        if (!courseNames.contains(courseName)) {
+        if (!studentCourses.contains(stringCourseName)) {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_DOES_NOT_HAVE_THAT_COURSE, courseName));
         }
 
-        int courseId = coursesService.getCourseByName(courseName.toString()).getId();
-        return studentsCoursesService.deleteStudentFromCourse(student.getId(), courseId);
+        CourseDTO course = coursesService.getCourseByName(courseName.toString());
+        return studentsCoursesService.deleteStudentFromCourse(student.id(), course.id());
     }
 
     public List<String> getAllGroupNames() {
         return groupsService.getAllGroupNames();
     }
 
-    public Student getStudentById(int id) {
-        Map<Student, Integer> studentGroupId = studentsService.getStudentById(id);
-        Student student = groupsService.setGroupToStudents(studentGroupId).get(0);
-        List<Integer> courseIds = studentsCoursesService.getCourseIdsByStudentId(student.getId());
-        List<Course> courses = coursesService.getCoursesByIds(courseIds);
-        student.setCourses(courses);
-        return student;
+    public StudentCourseDTO getStudentById(int id) {
+        StudentDTO student = studentsService.getStudentById(id);
+        List<Integer> courseIds = studentsCoursesService.getCourseIdsByStudentId(student.id());
+        List<String> courses = coursesService.getCoursesByIds(courseIds).stream().map(CourseDTO::name).collect(toList());
+        return studentCourseMapper.mapToStudentCourseDTO(student, courses);
     }
 
     private void printGroupsByNumber(Scanner console) {
         System.out.println("Print students’ number:");
         int number = convertStringToInt(console.nextLine());
-        List<Group> groups = findGroupsByNumber(number);
+        List<GroupDTO> groups = findGroupsByNumber(number);
         printGroups(groups);
     }
 
@@ -155,7 +167,7 @@ public class SchoolApplication {
         printAllCourseNames();
         CourseName courseName = convertStringToCourseName(console.nextLine());
 
-        List<Student> students = findStudentsByCourse(courseName);
+        List<StudentDTO> students = findStudentsByCourse(courseName);
         printStudents(students);
     }
 
@@ -188,7 +200,7 @@ public class SchoolApplication {
     private void startAddingStudentToCourse(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
-        Student student = getStudentById(id);
+        StudentCourseDTO student = getStudentById(id);
 
         printCurrentStudentCourses(student);
         System.out.println("\nAll available courses:");
@@ -203,7 +215,7 @@ public class SchoolApplication {
     private void startDeletingStudentFromCourse(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
-        Student student = getStudentById(id);
+        StudentCourseDTO student = getStudentById(id);
 
         printCurrentStudentCourses(student);
         System.out.println("\nPrint course that you want to remove from this student:");
@@ -215,13 +227,13 @@ public class SchoolApplication {
         }
     }
 
-    private void printCurrentStudentCourses(Student student) {
-        List<Course> studentCourses = student.getCourses();
+    private void printCurrentStudentCourses(StudentCourseDTO student) {
+        List<String> studentCourses = student.courses();
         System.out.println("Students current courses:");
         printCourseNames(studentCourses);
     }
 
-    private void printGroups(List<Group> groups) {
+    private void printGroups(List<GroupDTO> groups) {
         for (var group : groups) {
             System.out.println(group);
         }
@@ -239,15 +251,15 @@ public class SchoolApplication {
         }
     }
 
-    private void printStudents (List<Student> students) {
+    private void printStudents (List<StudentDTO> students) {
         for (var student : students) {
             System.out.println(student);
         }
     }
 
-    private void printCourseNames (List<Course> courses) {
+    private void printCourseNames (List<String> courses) {
         for (var course : courses) {
-            System.out.println(course.getName());
+            System.out.println(course);
         }
     }
 

@@ -4,7 +4,10 @@ import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
+import com.foxminded.dto.GroupDTO;
+import com.foxminded.dto.mappers.GroupDTOMapper;
 import com.foxminded.enums.CourseName;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +30,12 @@ class GroupsServiceImplTest {
     GroupsServiceImpl groupsService;
     @Mock
     GroupDao groupDao;
+    private GroupDTOMapper groupMapper;
+
+    @BeforeEach
+    void init() {
+        groupMapper = new GroupDTOMapper();
+    }
 
     @Test
     void testGetGroupsByIds_Success() {
@@ -36,29 +47,13 @@ class GroupsServiceImplTest {
         group2.setId(2);
         group2.setName("name2");
 
-        List<Group> expectedList = List.of(group1, group2);
-        doReturn(expectedList).when(groupDao).getGroupsByIds(List.of(1, 2));
-        List<Group> actualList = groupDao.getGroupsByIds(List.of(1, 2));
+        List<Group> groupList = List.of(group1, group2);
+        doReturn(groupList).when(groupDao).getGroupsByIds(List.of(1, 2));
+        List<GroupDTO> actualList = groupsService.getGroupsByIds(List.of(1, 2));
+        List<GroupDTO> expectedList = groupList.stream().map(groupMapper::mapToGroupDTO).toList();
 
         assertEquals(expectedList, actualList);
         verify(groupDao, times(1)).getGroupsByIds(List.of(1, 2));
-    }
-
-    @Test
-    void testSetGroupToStudents_Success() {
-        Student student = new Student();
-        student.setId(1);
-
-        Group group = new Group();
-        group.setId(1);
-
-        Map<Student, Integer> studentsGroupIds = new HashMap<>();
-        studentsGroupIds.put(student, 1);
-
-        when(groupDao.getGroupById(1)).thenReturn(group);
-
-        assertEquals(List.of(student), groupsService.setGroupToStudents(studentsGroupIds));
-        verify(groupDao, times(1)).getGroupById(1);
     }
 
     @Test
@@ -82,8 +77,9 @@ class GroupsServiceImplTest {
         group.setId(1);
         group.setName("someName");
         when(groupDao.getGroupByName("someName")).thenReturn(group);
+        GroupDTO actualGroup = groupMapper.mapToGroupDTO(group);
 
-        assertEquals(group, groupsService.getGroupByName("someName"));
+        assertEquals(actualGroup, groupsService.getGroupByName("someName"));
         verify(groupDao).getGroupByName("someName");
     }
 
