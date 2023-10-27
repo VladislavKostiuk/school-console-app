@@ -1,87 +1,93 @@
 package com.foxminded.dao;
 
-import com.foxminded.dao.factrory.DaoFactory;
+import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Student;
-import com.foxminded.utility.SqlPartsCreator;
-import com.foxminded.utility.StreamCloser;
-
-import java.sql.Connection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.*;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+@Repository
 public class StudentDao {
 
-    private DaoFactory daoFactory;
+    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
+    private ResultSetExtractor<Map<Student, Integer>> studentExtractor;
 
-    public StudentDao() {
-        daoFactory = new DaoFactory();
+    @Autowired
+    public StudentDao(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        initStudentExtractor();
     }
 
-    public List<Integer> getGroupsIdByStudentNumber(int number) {
+    public void saveStudents(List<Student> students) {
+        jdbcTemplate.batchUpdate("INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, students.get(i).getGroup().getId());
+                        ps.setString(2, students.get(i).getFirstName());
+                        ps.setString(3, students.get(i).getLastName());
+                    }
+
+                    @Override
+                    public int getBatchSize() {
+                        return students.size();
+                    }
+                });
+    }
+
+    public List<Integer> getGroupIdsByStudentNumber(int number) {
         List<Integer> groupIdList = new ArrayList<>();
-        ResultSet resultSet = null;
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "SELECT group_id FROM students GROUP BY group_id HAVING COUNT(*) <= ?")) {
-            statement.setInt(1, number);
-            resultSet = statement.executeQuery();
-            while (resultSet.next()) {
+        jdbcTemplate.query("SELECT group_id FROM students GROUP BY group_id HAVING COUNT(*) <= ?", new RowCallbackHandler() {
+            @Override
+            public void processRow(ResultSet resultSet) throws SQLException {
                 groupIdList.add(resultSet.getInt("group_id"));
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            StreamCloser.closeResultSet(resultSet);
-        }
+        }, number);
 
         return groupIdList;
     }
 
     public void saveStudent(String firstName, String lastName, int groupId) {
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)")) {
-            statement.setInt(1, groupId);
-            statement.setString(2, firstName);
-            statement.setString(3, lastName);
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public void saveStudents(List<Student> students) {
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)");) {
-            for (var student : students) {
-                statement.setInt(1, student.getGroup().getId());
-                statement.setString(2, student.getFirstName());
-                statement.setString(3, student.getLastName());
-                statement.addBatch();
-            }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        jdbcTemplate.update("INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)",
+                groupId, firstName, lastName);
     }
 
     public Map<Student, Integer> getStudentsByIds(List<Integer> studentIds) {
-        ResultSet resultSet = null;
-        Map<Student, Integer> studentsGroupIds = new HashMap<>();
-        String sql = "SELECT * FROM students WHERE student_id " + SqlPartsCreator.createInPart(studentIds.size());
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            for (int i = 0; i < studentIds.size(); i++) {
-                statement.setInt(i + 1, studentIds.get(i));
-            }
-            resultSet = statement.executeQuery();
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("ids", studentIds);
+        return namedParamJdbcTemplate.query("SELECT * FROM students WHERE student_id IN (:ids)", parameterSource, studentExtractor);
 
+    }
+
+    public boolean deleteStudentById(int studentId) {
+        return jdbcTemplate.update("DELETE FROM students WHERE student_id = ?", studentId) != 0;
+    }
+
+    public Map<Student, Integer> getStudentById(int studentId) {
+        return jdbcTemplate.query("SELECT * FROM students WHERE student_id = ?", studentExtractor, studentId);
+    }
+
+    public int getStudentsAmount() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM students", Integer.class);
+    }
+
+    private void initStudentExtractor() {
+        studentExtractor = resultSet -> {
+            if (!resultSet.isBeforeFirst()) {
+                throw new IllegalArgumentException(ErrorMessages.STUDENT_WITH_THAT_ID_WAS_NOT_FOUND);
+            }
+
+            Map<Student, Integer> studentsGroupIds = new HashMap<>();
             while (resultSet.next()) {
                 Student student = new Student();
                 student.setId(resultSet.getInt("student_id"));
@@ -90,59 +96,8 @@ public class StudentDao {
                 int groupId = resultSet.getInt("group_id");
                 studentsGroupIds.put(student, groupId);
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            StreamCloser.closeResultSet(resultSet);
-        }
-
-        return studentsGroupIds;
-    }
-
-    public boolean deleteStudentById(int studentId) {
-        int affectedRows;
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "DELETE FROM students WHERE student_id = ?")) {
-            statement.setInt(1, studentId);
-            affectedRows = statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-
-        return affectedRows != 0;
-    }
-
-    public Map<Student, Integer> getStudentById(int studentId) {
-        ResultSet resultSet = null;
-        Map<Student, Integer> studentsGroupIds = new HashMap<>();
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement("SELECT * FROM students WHERE student_id = ?")) {
-            statement.setInt(1, studentId);
-            resultSet = statement.executeQuery();
-
-            resultSet.next();
-            Student student = new Student();
-            student.setId(resultSet.getInt("student_id"));
-            student.setFirstName(resultSet.getString("first_name"));
-            student.setLastName(resultSet.getString("last_name"));
-            int groupId = resultSet.getInt("group_id");
-            studentsGroupIds.put(student, groupId);
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (resultSet != null) {
-                try {
-                    resultSet.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-
-        return studentsGroupIds;
+            return studentsGroupIds;
+        };
     }
 
 }

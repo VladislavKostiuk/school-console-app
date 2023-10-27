@@ -2,27 +2,35 @@ package com.foxminded.service.impl;
 
 import com.foxminded.dao.StudentDao;
 import com.foxminded.domain.Student;
+import com.foxminded.dto.StudentDTO;
+import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.service.StudentsService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class StudentsServiceImpl implements StudentsService {
 
     private final StudentDao studentDao;
+    private final StudentDTOMapper studentMapper;
 
-    public StudentsServiceImpl() {
-        studentDao = new StudentDao();
+    @Autowired
+    public StudentsServiceImpl(StudentDao studentDao) {
+        this.studentDao = studentDao;
+        studentMapper = new StudentDTOMapper();
     }
 
     @Override
-    public List<Integer> getGroupsIdByStudentNumber(int number) {
-        return studentDao.getGroupsIdByStudentNumber(number);
+    public List<Integer> getGroupIdsByStudentNumber(int number) {
+        return studentDao.getGroupIdsByStudentNumber(number);
     }
 
     @Override
-    public Map<Student, Integer> getStudentsByIds(List<Integer> ids) {
-        return studentDao.getStudentsByIds(ids);
+    public List<StudentDTO> getStudentsByIds(List<Integer> ids) {
+        return studentMapper.mapToStudentDTOList(studentDao.getStudentsByIds(ids));
     }
 
     @Override
@@ -36,13 +44,8 @@ public class StudentsServiceImpl implements StudentsService {
     }
 
     @Override
-    public Map<Student, Integer> getStudentById(int id) {
-        return studentDao.getStudentById(id);
-    }
-
-    @Override
-    public void saveStudents(List<Student> students) {
-        studentDao.saveStudents(students);
+    public StudentDTO getStudentById(int id) {
+        return studentMapper.mapToStudentDTOList(studentDao.getStudentById(id)).get(0);
     }
 
 }

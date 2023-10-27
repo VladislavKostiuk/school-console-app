@@ -1,85 +1,104 @@
 package com.foxminded.dao;
 
+import com.foxminded.constants.ErrorMessages;
 import com.foxminded.enums.CourseName;
-import com.foxminded.dao.factrory.DaoFactory;
 import com.foxminded.domain.Course;
-import com.foxminded.utility.SqlPartsCreator;
-import com.foxminded.utility.StreamCloser;
-
-import java.sql.Connection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class CourseDao {
 
-    private DaoFactory daoFactory;
+    private final JdbcTemplate jdbcTemplate;
+    private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
+    private ResultSetExtractor<Course> courseExtractor;
+    private RowMapper<Course> courseRowMapper;
 
-    public CourseDao() {
-        daoFactory = new DaoFactory();
+    @Autowired
+    public CourseDao(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+
+        initCourseExtractor();
+        initCourseRowMapper();
     }
 
     public void saveCourses(List<Course> courses) {
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(
-                     "INSERT INTO courses(course_name, course_description) VALUES (?, ?)");) {
+        jdbcTemplate.batchUpdate("INSERT INTO courses(course_name, course_description) VALUES (?, ?)",
+                new BatchPreparedStatementSetter() {
+                    @Override
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setString(1, courses.get(i).getName().toString());
+                        ps.setString(2, courses.get(i).getDescription());
+                    }
 
-            for (var course : courses) {
-                statement.setString(1, course.getName().toString());
-                statement.setString(2, course.getDescription());
-                statement.addBatch();
-            }
-            statement.executeBatch();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+                    @Override
+                    public int getBatchSize() {
+                        return courses.size();
+                    }
+                });
     }
 
-    public int getIdByName(String name) {
-        ResultSet resultSet = null;
-        int courseId;
-        try (Connection connection = daoFactory.getConnection();
-        PreparedStatement statement = connection.prepareStatement("SELECT course_id FROM courses WHERE course_name = ?")) {
-            statement.setString(1, name);
-            resultSet = statement.executeQuery();
-            resultSet.next();
-            courseId = resultSet.getInt(1);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            StreamCloser.closeResultSet(resultSet);
-        }
+    public Course getCourseById(int id) {
+        return jdbcTemplate.query("SELECT * FROM courses WHERE course_id = ?", courseExtractor, id);
+    }
 
-        return courseId;
+    public Course getCourseByName(String name) {
+        return jdbcTemplate.query("SELECT * FROM courses WHERE course_name = ?", courseExtractor, name);
     }
 
     public List<Course> getCoursesByIds(List<Integer> courseIds) {
-        List<Course> courses = new ArrayList<>();
-        ResultSet resultSet = null;
-        String sql = "SELECT * FROM courses WHERE course_id " + SqlPartsCreator.createInPart(courseIds.size());
-        try (Connection connection = daoFactory.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
-            for (int i = 0; i < courseIds.size(); i++) {
-                statement.setInt(i + 1, courseIds.get(i));
-            }
-            resultSet = statement.executeQuery();
+        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+        parameterSource.addValue("ids", courseIds);
+        List<Course> courses = namedParamJdbcTemplate.query("SELECT * FROM courses WHERE course_id IN (:ids)",
+                parameterSource, courseRowMapper);
 
-            while (resultSet.next()) {
-                Course course = new Course();
-                course.setId(resultSet.getInt("course_id"));
-                course.setName(CourseName.valueOf(resultSet.getString("course_name")));
-                course.setDescription(resultSet.getString("course_description"));
-                courses.add(course);
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            StreamCloser.closeResultSet(resultSet);
+        if (courses.size() != courseIds.size()) {
+            throw new IllegalArgumentException(ErrorMessages.SOME_COURSES_WAS_NOT_FOUND);
         }
 
         return courses;
+    }
+
+    public int getCoursesAmount() {
+        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM courses", Integer.class);
+    }
+
+    private void initCourseExtractor() {
+        courseExtractor = resultSet -> {
+            if (!resultSet.next()) {
+                throw new IllegalArgumentException(ErrorMessages.COURSE_WITH_THAT_PARAM_WAS_NOT_FOUND);
+            }
+
+            return mapCourse(resultSet);
+        };
+    }
+
+    private void initCourseRowMapper() {
+        courseRowMapper = (resultSet, rowNum) -> mapCourse(resultSet);
+    }
+
+    private Course mapCourse(ResultSet resultSet) {
+        Course course = new Course();
+        try {
+            course.setId(resultSet.getInt("course_id"));
+            course.setName(CourseName.valueOf(resultSet.getString("course_name")));
+            course.setDescription(resultSet.getString("course_description"));
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return course;
     }
 
 }

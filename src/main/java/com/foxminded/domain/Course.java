@@ -32,4 +32,38 @@ public class Course {
         this.description = description;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if ((!(obj instanceof Course))) {
+            return false;
+        }
+
+        Course someCourse = (Course) obj;
+
+        if (this.description == null ? (someCourse.description != null)
+                : !this.description.equals(someCourse.description)) {
+            return false;
+        }
+
+        if (this.name == null ? (someCourse.name != null)
+                : this.name != someCourse.name) {
+            return false;
+        }
+
+        return this.id == someCourse.id;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash += 31 * id;
+        hash += 31 * (name != null ? name.hashCode() : 0);
+        hash += 31 * (description != null ? description.hashCode() : 0);
+        return hash;
+    }
+
 }

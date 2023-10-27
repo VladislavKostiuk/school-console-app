@@ -5,9 +5,11 @@ import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
+@Component
 public class TestDataGenerator {
 
     private final List<String> groupNamesCache;

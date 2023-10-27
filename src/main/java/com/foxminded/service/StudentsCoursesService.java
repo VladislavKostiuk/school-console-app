@@ -16,6 +16,4 @@ public interface StudentsCoursesService {
 
     boolean deleteStudentFromCourse(int studentId, int courseId);
 
-    void saveStudentsCourses(List<Student> students);
-
 }
