@@ -2,6 +2,8 @@ package com.foxminded.dao;
 
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Student;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -19,16 +21,19 @@ public class StudentDao {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
     private ResultSetExtractor<Map<Student, Integer>> studentExtractor;
+    private final Logger logger;
 
     @Autowired
     public StudentDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        logger = LoggerFactory.getLogger(StudentDao.class);
 
         initStudentExtractor();
     }
 
     public void saveStudents(List<Student> students) {
+        logger.info("Saving students to db");
         jdbcTemplate.batchUpdate("INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -47,6 +52,7 @@ public class StudentDao {
 
     public List<Integer> getGroupIdsByStudentNumber(int number) {
         List<Integer> groupIdList = new ArrayList<>();
+        logger.info("Getting group ids by student amount ({}) from db", number);
         jdbcTemplate.query("SELECT group_id FROM students GROUP BY group_id HAVING COUNT(*) <= ?", new RowCallbackHandler() {
             @Override
             public void processRow(ResultSet resultSet) throws SQLException {
@@ -58,11 +64,13 @@ public class StudentDao {
     }
 
     public void saveStudent(String firstName, String lastName, int groupId) {
+        logger.info("Saving student to db");
         jdbcTemplate.update("INSERT INTO students(group_id, first_name, last_name) VALUES (?, ?, ?)",
                 groupId, firstName, lastName);
     }
 
     public Map<Student, Integer> getStudentsByIds(List<Integer> studentIds) {
+        logger.info("Getting students by ids: {} from db", studentIds);
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", studentIds);
         return namedParamJdbcTemplate.query("SELECT * FROM students WHERE student_id IN (:ids)", parameterSource, studentExtractor);
@@ -70,14 +78,17 @@ public class StudentDao {
     }
 
     public boolean deleteStudentById(int studentId) {
+        logger.info("Deleting student with id {} from db", studentId);
         return jdbcTemplate.update("DELETE FROM students WHERE student_id = ?", studentId) != 0;
     }
 
     public Map<Student, Integer> getStudentById(int studentId) {
+        logger.info("Getting student by id {} from db", studentId);
         return jdbcTemplate.query("SELECT * FROM students WHERE student_id = ?", studentExtractor, studentId);
     }
 
     public int getStudentsAmount() {
+        logger.info("Getting student amount from db");
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM students", Integer.class);
     }
 

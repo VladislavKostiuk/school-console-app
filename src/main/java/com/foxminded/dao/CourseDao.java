@@ -3,6 +3,8 @@ package com.foxminded.dao;
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.enums.CourseName;
 import com.foxminded.domain.Course;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,18 +26,22 @@ public class CourseDao {
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
     private ResultSetExtractor<Course> courseExtractor;
     private RowMapper<Course> courseRowMapper;
+    private final Logger logger;
 
     @Autowired
     public CourseDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        logger = LoggerFactory.getLogger(CourseDao.class);
 
         initCourseExtractor();
         initCourseRowMapper();
     }
 
     public void saveCourses(List<Course> courses) {
-        jdbcTemplate.batchUpdate("INSERT INTO courses(course_name, course_description) VALUES (?, ?)",
+        String sql = "INSERT INTO courses(course_name, course_description) VALUES (?, ?)";
+        logger.info("Saving courses to db");
+        jdbcTemplate.batchUpdate(sql,
                 new BatchPreparedStatementSetter() {
                     @Override
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -51,18 +57,25 @@ public class CourseDao {
     }
 
     public Course getCourseById(int id) {
-        return jdbcTemplate.query("SELECT * FROM courses WHERE course_id = ?", courseExtractor, id);
+        String sql = "SELECT * FROM courses WHERE course_id = ?";
+        logger.info("Getting course by id {} from db", id);
+        Course course = jdbcTemplate.query(sql, courseExtractor, id);
+        return course;
     }
 
     public Course getCourseByName(String name) {
-        return jdbcTemplate.query("SELECT * FROM courses WHERE course_name = ?", courseExtractor, name);
+        String sql = "SELECT * FROM courses WHERE course_name = ?";
+        logger.info("Getting course by name {} from db", name);
+        Course course = jdbcTemplate.query(sql, courseExtractor, name);
+        return course;
     }
 
     public List<Course> getCoursesByIds(List<Integer> courseIds) {
+        String sql = "SELECT * FROM courses WHERE course_id IN (:ids)";
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", courseIds);
-        List<Course> courses = namedParamJdbcTemplate.query("SELECT * FROM courses WHERE course_id IN (:ids)",
-                parameterSource, courseRowMapper);
+        List<Course> courses = namedParamJdbcTemplate.query(sql, parameterSource, courseRowMapper);
+        logger.info("Getting courses by ids: {} from db", courseIds);
 
         if (courses.size() != courseIds.size()) {
             throw new IllegalArgumentException(ErrorMessages.SOME_COURSES_WAS_NOT_FOUND);
@@ -72,7 +85,10 @@ public class CourseDao {
     }
 
     public int getCoursesAmount() {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM courses", Integer.class);
+        String sql = "SELECT COUNT(*) FROM courses";
+        logger.info("Getting courses amount from db");
+        int amount = jdbcTemplate.queryForObject(sql, Integer.class);
+        return amount;
     }
 
     private void initCourseExtractor() {

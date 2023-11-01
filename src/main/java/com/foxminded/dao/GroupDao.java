@@ -2,6 +2,8 @@ package com.foxminded.dao;
 
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Group;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,18 +25,22 @@ public class GroupDao {
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
     private RowMapper<Group> groupRowMapper;
     private ResultSetExtractor<Group> groupExtractor;
+    private final Logger logger;
 
     @Autowired
     public GroupDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        logger = LoggerFactory.getLogger(GroupDao.class);
 
         initGroupRowMapper();
         initGroupExtractor();
     }
 
     public void saveGroups(List<Group> groups) {
-        jdbcTemplate.batchUpdate("INSERT INTO groups(group_name) VALUES (?)", new BatchPreparedStatementSetter() {
+        String sql = "INSERT INTO groups(group_name) VALUES (?)";
+        logger.info("Saving groups to db");
+        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
                 ps.setString(1, groups.get(i).getName());
@@ -48,10 +54,12 @@ public class GroupDao {
     }
 
     public List<Group> getGroupsByIds(List<Integer> groupIdList) {
+        String sql = "SELECT * FROM groups where group_id IN (:ids)";
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", groupIdList);
 
-        List<Group> groups = namedParamJdbcTemplate.query("SELECT * FROM groups where group_id IN (:ids)", parameterSource ,groupRowMapper);
+        logger.info("Getting groups by ids: {} from db", groupIdList);
+        List<Group> groups = namedParamJdbcTemplate.query(sql, parameterSource ,groupRowMapper);
 
         if (groups.size() != groupIdList.size()) {
             throw new IllegalArgumentException(ErrorMessages.SOME_GROUPS_WAS_NOT_FOUND);
@@ -61,23 +69,33 @@ public class GroupDao {
     }
 
     public Group getGroupById(int groupId) {
-        return jdbcTemplate.query("SELECT * FROM groups where group_id = ?", groupExtractor, groupId);
+        String sql = "SELECT * FROM groups where group_id = ?";
+        logger.info("Getting group by id {} from db", groupId);
+        return jdbcTemplate.query(sql, groupExtractor, groupId);
     }
 
     public Group getGroupByName(String groupName) {
-        return jdbcTemplate.query("SELECT * FROM groups where group_name = ?", groupExtractor, groupName);
+        String sql = "SELECT * FROM groups where group_name = ?";
+        logger.info("Getting group by name {} from db", groupName);
+        return jdbcTemplate.query(sql, groupExtractor, groupName);
     }
 
     public List<Group> getAllGroups() {
-        return jdbcTemplate.query("SELECT * FROM groups", groupRowMapper);
+        String sql = "SELECT * FROM groups";
+        logger.info("Getting all groups from db");
+        return jdbcTemplate.query(sql, groupRowMapper);
     }
 
     public int getGroupsAmount() {
-        return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM groups", Integer.class);
+        String sql = "SELECT COUNT(*) FROM groups";
+        logger.info("Getting groups amount from db");
+        return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
     public boolean deleteGroupById(int id) {
-        return jdbcTemplate.update("DELETE FROM groups WHERE group_id = ?", id) != 0;
+        String sql = "DELETE FROM groups WHERE group_id = ?";
+        logger.info("Deleting group by id {} from db", id);
+        return jdbcTemplate.update(sql, id) != 0;
     }
 
     private void initGroupExtractor() {
