@@ -118,7 +118,7 @@ public class GroupDao {
             group.setName(resultSet.getString("group_name"));
             group.setId(resultSet.getInt("group_id"));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return group;
     }

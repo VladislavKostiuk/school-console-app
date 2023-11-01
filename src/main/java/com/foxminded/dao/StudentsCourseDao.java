@@ -99,7 +99,7 @@ public class StudentsCourseDao {
                 studentIds.add(resultSet.getInt(1));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
 
         return studentIds;

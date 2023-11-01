@@ -112,7 +112,7 @@ public class CourseDao {
             course.setName(CourseName.valueOf(resultSet.getString("course_name")));
             course.setDescription(resultSet.getString("course_description"));
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
         return course;
     }
