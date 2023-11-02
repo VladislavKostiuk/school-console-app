@@ -2,6 +2,8 @@ package com.foxminded.dao;
 
 import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Student;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -19,11 +21,13 @@ public class StudentDao {
     private final JdbcTemplate jdbcTemplate;
     private final NamedParameterJdbcTemplate namedParamJdbcTemplate;
     private ResultSetExtractor<Map<Student, Integer>> studentExtractor;
+    private final Logger logger;
 
     @Autowired
     public StudentDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.namedParamJdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
+        logger = LoggerFactory.getLogger(StudentDao.class);
 
         initStudentExtractor();
     }

@@ -10,18 +10,14 @@ import com.foxminded.dto.mappers.StudentCourseDTOMapper;
 import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.enums.CourseName;
 import com.foxminded.constants.ErrorMessages;
-import com.foxminded.domain.Course;
-import com.foxminded.domain.Group;
-import com.foxminded.domain.Student;
 import com.foxminded.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -32,10 +28,8 @@ public class SchoolApplication {
     private final GroupsService groupsService;
     private final StudentsCoursesService studentsCoursesService;
     private final StudentsService studentsService;
-    private final CourseDTOMapper courseMapper;
-    private final GroupDTOMapper groupMapper;
-    private final StudentDTOMapper studentMapper;
     private final StudentCourseDTOMapper studentCourseMapper;
+    private final Logger logger;
 
     @Autowired
     public SchoolApplication(CoursesService coursesService,
@@ -48,10 +42,8 @@ public class SchoolApplication {
         this.studentsCoursesService = studentsCoursesService;
         this.studentsService = studentsService;
         initService.init(10, 10, 200);
-        courseMapper = new CourseDTOMapper();
-        groupMapper = new GroupDTOMapper();
-        studentMapper = new StudentDTOMapper();
         studentCourseMapper = new StudentCourseDTOMapper();
+        logger = LoggerFactory.getLogger(SchoolApplication.class);
     }
 
     public void showMenu() {
@@ -62,13 +54,16 @@ public class SchoolApplication {
                 "d) Delete a student by the STUDENT_ID\n" +
                 "e) Add a student to the course (from a list)\n" +
                 "f) Remove the student from one of their courses";
+        logger.info("Printing menu in console");
         System.out.println(menu);
         executeOptionalAction();
     }
 
     private void executeOptionalAction() {
+        logger.info("Getting option from user");
         try (Scanner console = new Scanner(System.in)) {
             String option = console.nextLine();
+            logger.info("Option {} is chosen", option);
             if (option.equals("a")) {
                 printGroupsByNumber(console);
             } else if (option.equals("b")) {
@@ -82,25 +77,28 @@ public class SchoolApplication {
             } else if (option.equals("f")) {
                 startDeletingStudentFromCourse(console);
             } else {
+                logger.warn("Option {} is not provided by application", option);
                 System.out.println("Unknown option");
             }
         }
     }
 
     public List<GroupDTO> findGroupsByNumber(int number) {
+        logger.info("Start getting groups by student amount {}", number);
         List<Integer> groupIds = studentsService.getGroupIdsByStudentNumber(number);
         return groupIds.isEmpty() ? new ArrayList<>()
                 : groupsService.getGroupsByIds(groupIds);
     }
 
     public List<StudentDTO> findStudentsByCourse(CourseName courseName) {
+        logger.info("Start getting students by course {}", courseName);
         CourseDTO course = coursesService.getCourseByName(courseName.toString());
         List<Integer> studentsId = studentsCoursesService.getStudentsIdByCourseId(course.id());
         return studentsService.getStudentsByIds(studentsId);
     }
 
     public void addStudent(String firstName, String lastName, String groupName) {
-
+        logger.info("Start saving student with first name {} and last name {}", firstName, lastName);
         if (firstName == null || lastName == null || firstName.equals("") || lastName.equals("")) {
             throw new IllegalArgumentException(ErrorMessages.WRONG_STUDENT_NAME);
         }
@@ -116,11 +114,13 @@ public class SchoolApplication {
     }
 
     public boolean deleteStudentById(int id) {
+        logger.info("Start deleting student by id {}", id);
         studentsCoursesService.deleteStudentCoursesByStudentId(id);
         return studentsService.deleteStudentById(id);
     }
 
     public void addStudentToCourse(StudentCourseDTO student, String stringCourseName) {
+        logger.info("Start saving student {} {} to course {}", student.firstName(), student.lastName(), stringCourseName);
         CourseName courseName = convertStringToCourseName(stringCourseName);
         List<String> studentCourses = student.courses();
 
@@ -133,6 +133,7 @@ public class SchoolApplication {
     }
 
     public boolean deleteStudentFromCourse(StudentCourseDTO student, String stringCourseName) {
+        logger.info("Start deleting student {} {} from course {}", student.firstName(), student.lastName(), stringCourseName);
         CourseName courseName = convertStringToCourseName(stringCourseName);
         List<String> studentCourses = student.courses();
 
@@ -145,10 +146,12 @@ public class SchoolApplication {
     }
 
     public List<String> getAllGroupNames() {
+        logger.info("Start getting all group names");
         return groupsService.getAllGroupNames();
     }
 
     public StudentCourseDTO getStudentById(int id) {
+        logger.info("Start getting student by id");
         StudentDTO student = studentsService.getStudentById(id);
         List<Integer> courseIds = studentsCoursesService.getCourseIdsByStudentId(student.id());
         List<String> courses = coursesService.getCoursesByIds(courseIds).stream().map(CourseDTO::name).collect(toList());
@@ -159,6 +162,7 @@ public class SchoolApplication {
         System.out.println("Print students’ number:");
         int number = convertStringToInt(console.nextLine());
         List<GroupDTO> groups = findGroupsByNumber(number);
+        logger.info("Printing groups");
         printGroups(groups);
     }
 
@@ -168,6 +172,7 @@ public class SchoolApplication {
         CourseName courseName = convertStringToCourseName(console.nextLine());
 
         List<StudentDTO> students = findStudentsByCourse(courseName);
+        logger.info("Printing students");
         printStudents(students);
     }
 
@@ -182,6 +187,7 @@ public class SchoolApplication {
         String groupName = console.nextLine();
 
         addStudent(firstName, lastName, groupName);
+        logger.info("Printing the result of adding student");
         System.out.println("Student " + firstName + ", " + lastName + " was added to db");
     }
 
@@ -191,8 +197,10 @@ public class SchoolApplication {
         boolean isDeleted = deleteStudentById(id);
 
         if (isDeleted) {
+            logger.info("Student was deleted successfully");
             System.out.println("Student with that id was deleted from db");
         } else {
+            logger.warn("Student was not deleted");
             System.out.println("Student with that id wasn't found");
         }
     }
@@ -209,6 +217,7 @@ public class SchoolApplication {
         String courseName = console.nextLine();
 
         addStudentToCourse(student, courseName);
+        logger.info("Printing the result of adding student to course");
         System.out.println(courseName + " was added to students courses list");
     }
 
@@ -223,7 +232,10 @@ public class SchoolApplication {
 
         boolean isDeleted = deleteStudentFromCourse(student, courseName);
         if (isDeleted) {
+            logger.info("Student was deleted from course successfully");
             System.out.println(courseName + " was deleted from course list of that student");
+        } else {
+            logger.warn("Student was not deleted from course");
         }
     }
 

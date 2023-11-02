@@ -1,6 +1,8 @@
 package com.foxminded.dao;
 
 import com.foxminded.constants.ErrorMessages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -16,10 +18,12 @@ import java.util.List;
 public class StudentsCourseDao {
 
     private final JdbcTemplate jdbcTemplate;
+    private final Logger logger;
 
     @Autowired
     public StudentsCourseDao(DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.logger = LoggerFactory.getLogger(StudentsCourseDao.class);
     }
 
 
@@ -88,7 +92,7 @@ public class StudentsCourseDao {
                 studentIds.add(resultSet.getInt(1));
             }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
 
         return studentIds;

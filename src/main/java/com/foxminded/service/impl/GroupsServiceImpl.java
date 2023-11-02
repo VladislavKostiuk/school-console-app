@@ -8,6 +8,8 @@ import com.foxminded.dto.StudentDTO;
 import com.foxminded.dto.mappers.GroupDTOMapper;
 import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.service.GroupsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -22,17 +24,18 @@ public class GroupsServiceImpl implements GroupsService {
 
     private final GroupDao groupDao;
     private final GroupDTOMapper groupMapper;
-    private final StudentDTOMapper studentMapper;
+    private final Logger logger;
 
     @Autowired
     public GroupsServiceImpl(GroupDao groupDao) {
         this.groupDao = groupDao;
         groupMapper = new GroupDTOMapper();
-        studentMapper = new StudentDTOMapper();
+        logger = LoggerFactory.getLogger(GroupsServiceImpl.class);
     }
 
     @Override
     public List<GroupDTO> getGroupsByIds(List<Integer> ids) {
+        logger.info("Getting groups by ids: {}", ids);
         return groupDao.getGroupsByIds(ids)
                 .stream()
                 .map(groupMapper::mapToGroupDTO)
@@ -41,6 +44,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public List<String> getAllGroupNames() {
+        logger.info("Getting all group names");
         return groupDao.getAllGroups()
                 .stream()
                 .map(Group::getName)
@@ -49,6 +53,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public GroupDTO getGroupByName(String name) {
+        logger.info("Getting group by name {}", name);
         return groupMapper.mapToGroupDTO(groupDao.getGroupByName(name));
     }
 

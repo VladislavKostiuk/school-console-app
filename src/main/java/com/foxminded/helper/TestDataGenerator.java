@@ -5,6 +5,8 @@ import com.foxminded.constants.ErrorMessages;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -16,6 +18,7 @@ public class TestDataGenerator {
     private final List<String[]> studentFullNames;
     private final List<CourseName> courseNames;
     private final Random random;
+    private final Logger logger;
 
     public TestDataGenerator() {
         random = new Random();
@@ -25,11 +28,13 @@ public class TestDataGenerator {
         courseNames = new ArrayList<>(Arrays.asList(CourseName.values()));
         Collections.shuffle(courseNames);
         Collections.shuffle(studentFullNames);
+        logger = LoggerFactory.getLogger(TestDataGenerator.class);
     }
 
     public List<Group> generateTestGroups(int amount) {
         List<Group> groups = new ArrayList<>();
 
+        logger.info("Generating test groups");
         for (int i = 0; i < amount; i++) {
             Group group = new Group();
             group.setId(i + 1);
@@ -43,6 +48,7 @@ public class TestDataGenerator {
     public List<Course> generateTestCourses(int amount) {
         List<Course> courses = new ArrayList<>();
 
+        logger.info("Generating test courses");
         for (int i = 0; i < amount; i++) {
             Course course = new Course();
             course.setId(i + 1);
@@ -57,6 +63,7 @@ public class TestDataGenerator {
     public List<Student> generateTestStudents(int amount) {
         List<Student> students = new ArrayList<>();
 
+        logger.info("Generating test students");
         for (int i = 0; i < amount; i++) {
             String[] fullName = generateStudentFullName();
             Student student = new Student();
