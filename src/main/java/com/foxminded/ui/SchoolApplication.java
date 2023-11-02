@@ -84,21 +84,21 @@ public class SchoolApplication {
     }
 
     public List<GroupDTO> findGroupsByNumber(int number) {
-        logger.info("Getting groups by student amount {}", number);
+        logger.info("Start getting groups by student amount {}", number);
         List<Integer> groupIds = studentsService.getGroupIdsByStudentNumber(number);
         return groupIds.isEmpty() ? new ArrayList<>()
                 : groupsService.getGroupsByIds(groupIds);
     }
 
     public List<StudentDTO> findStudentsByCourse(CourseName courseName) {
-        logger.info("Getting students by course {}", courseName);
+        logger.info("Start getting students by course {}", courseName);
         CourseDTO course = coursesService.getCourseByName(courseName.toString());
         List<Integer> studentsId = studentsCoursesService.getStudentsIdByCourseId(course.id());
         return studentsService.getStudentsByIds(studentsId);
     }
 
     public void addStudent(String firstName, String lastName, String groupName) {
-        logger.info("Saving student with first name {} and last name {}", firstName, lastName);
+        logger.info("Start saving student with first name {} and last name {}", firstName, lastName);
         if (firstName == null || lastName == null || firstName.equals("") || lastName.equals("")) {
             throw new IllegalArgumentException(ErrorMessages.WRONG_STUDENT_NAME);
         }
@@ -114,12 +114,13 @@ public class SchoolApplication {
     }
 
     public boolean deleteStudentById(int id) {
-        logger.info("Deleting student by id {}", id);
+        logger.info("Start deleting student by id {}", id);
         studentsCoursesService.deleteStudentCoursesByStudentId(id);
         return studentsService.deleteStudentById(id);
     }
 
     public void addStudentToCourse(StudentCourseDTO student, String stringCourseName) {
+        logger.info("Start saving student {} {} to course {}", student.firstName(), student.lastName(), stringCourseName);
         CourseName courseName = convertStringToCourseName(stringCourseName);
         List<String> studentCourses = student.courses();
 
@@ -128,11 +129,11 @@ public class SchoolApplication {
         }
 
         CourseDTO course = coursesService.getCourseByName(courseName.toString());
-        logger.info("Saving student course with student id {} and course id {}", student.id(), course.id());
         studentsCoursesService.addStudentToCourse(student.id(), course.id());
     }
 
     public boolean deleteStudentFromCourse(StudentCourseDTO student, String stringCourseName) {
+        logger.info("Start deleting student {} {} from course {}", student.firstName(), student.lastName(), stringCourseName);
         CourseName courseName = convertStringToCourseName(stringCourseName);
         List<String> studentCourses = student.courses();
 
@@ -141,17 +142,16 @@ public class SchoolApplication {
         }
 
         CourseDTO course = coursesService.getCourseByName(courseName.toString());
-        logger.info("Deleting student course with student id {} and course id {}", student.id(), course.id());
         return studentsCoursesService.deleteStudentFromCourse(student.id(), course.id());
     }
 
     public List<String> getAllGroupNames() {
-        logger.info("Getting all group names");
+        logger.info("Start getting all group names");
         return groupsService.getAllGroupNames();
     }
 
     public StudentCourseDTO getStudentById(int id) {
-        logger.info("Getting student by id");
+        logger.info("Start getting student by id");
         StudentDTO student = studentsService.getStudentById(id);
         List<Integer> courseIds = studentsCoursesService.getCourseIdsByStudentId(student.id());
         List<String> courses = coursesService.getCoursesByIds(courseIds).stream().map(CourseDTO::name).collect(toList());
@@ -196,10 +196,11 @@ public class SchoolApplication {
         int id = convertStringToInt(console.nextLine());
         boolean isDeleted = deleteStudentById(id);
 
-        logger.info("Printing the result of deleting student");
         if (isDeleted) {
+            logger.info("Student was deleted successfully");
             System.out.println("Student with that id was deleted from db");
         } else {
+            logger.warn("Student was not deleted");
             System.out.println("Student with that id wasn't found");
         }
     }
@@ -230,10 +231,11 @@ public class SchoolApplication {
         String courseName = console.nextLine();
 
         boolean isDeleted = deleteStudentFromCourse(student, courseName);
-
-        logger.info("Printing the result of deleting student to course");
         if (isDeleted) {
+            logger.info("Student was deleted from course successfully");
             System.out.println(courseName + " was deleted from course list of that student");
+        } else {
+            logger.warn("Student was not deleted from course");
         }
     }
 

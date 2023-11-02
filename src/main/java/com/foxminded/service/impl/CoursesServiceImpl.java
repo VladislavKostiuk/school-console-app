@@ -28,13 +28,13 @@ public class CoursesServiceImpl implements CoursesService {
 
     @Override
     public CourseDTO getCourseByName(String name) {
-        logger.info("Getting course by name {} from {}", name, CourseDao.class);
+        logger.info("Getting course by name {}", name);
         return courseMapper.mapToCourseDTO(courseDao.getCourseByName(name));
     }
 
     @Override
     public List<CourseDTO> getCoursesByIds(List<Integer> ids) {
-        logger.info("Getting courses by ids {} from {}", ids, CourseDao.class);
+        logger.info("Getting courses by ids {}", ids);
         return courseDao.getCoursesByIds(ids)
                 .stream()
                 .map(courseMapper::mapToCourseDTO)

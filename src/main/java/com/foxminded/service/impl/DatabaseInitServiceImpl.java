@@ -52,23 +52,23 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
 
         assignCoursesAndGroupsToStudents(students, groups, courses);
 
-        logger.info("Saving test courses to db if courses table is empty");
         if (courseDao.getCoursesAmount() == 0) {
+            logger.info("Saving test courses if courses table is empty");
             courseDao.saveCourses(courses);
         }
 
-        logger.info("Saving test groups to db if groups table is empty");
         if (groupDao.getGroupsAmount() == 0) {
+            logger.info("Saving test groups if groups table is empty");
             groupDao.saveGroups(groups);
         }
 
-        logger.info("Saving test students to db if students table is empty");
         if (studentDao.getStudentsAmount() == 0) {
+            logger.info("Saving test students if students table is empty");
             studentDao.saveStudents(students);
         }
 
-        logger.info("Saving test students courses to db if students_courses table is empty");
         if (studentsCourseDao.getStudentCoursesAmount() == 0) {
+            logger.info("Saving test students courses if students_courses table is empty");
             List<int[]> studentsCourses = new ArrayList<>();
             for (var student : students) {
                 for (var course : student.getCourses()) {

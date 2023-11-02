@@ -39,7 +39,6 @@ public class GroupDao {
 
     public void saveGroups(List<Group> groups) {
         String sql = "INSERT INTO groups(group_name) VALUES (?)";
-        logger.info("Saving groups to db");
         jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement ps, int i) throws SQLException {
@@ -58,7 +57,6 @@ public class GroupDao {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", groupIdList);
 
-        logger.info("Getting groups by ids: {} from db", groupIdList);
         List<Group> groups = namedParamJdbcTemplate.query(sql, parameterSource ,groupRowMapper);
 
         if (groups.size() != groupIdList.size()) {
@@ -70,31 +68,26 @@ public class GroupDao {
 
     public Group getGroupById(int groupId) {
         String sql = "SELECT * FROM groups where group_id = ?";
-        logger.info("Getting group by id {} from db", groupId);
         return jdbcTemplate.query(sql, groupExtractor, groupId);
     }
 
     public Group getGroupByName(String groupName) {
         String sql = "SELECT * FROM groups where group_name = ?";
-        logger.info("Getting group by name {} from db", groupName);
         return jdbcTemplate.query(sql, groupExtractor, groupName);
     }
 
     public List<Group> getAllGroups() {
         String sql = "SELECT * FROM groups";
-        logger.info("Getting all groups from db");
         return jdbcTemplate.query(sql, groupRowMapper);
     }
 
     public int getGroupsAmount() {
         String sql = "SELECT COUNT(*) FROM groups";
-        logger.info("Getting groups amount from db");
         return jdbcTemplate.queryForObject(sql, Integer.class);
     }
 
     public boolean deleteGroupById(int id) {
         String sql = "DELETE FROM groups WHERE group_id = ?";
-        logger.info("Deleting group by id {} from db", id);
         return jdbcTemplate.update(sql, id) != 0;
     }
 

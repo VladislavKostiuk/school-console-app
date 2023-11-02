@@ -35,7 +35,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public List<GroupDTO> getGroupsByIds(List<Integer> ids) {
-        logger.info("Getting groups by ids: {} from {}", ids, GroupDao.class);
+        logger.info("Getting groups by ids: {}", ids);
         return groupDao.getGroupsByIds(ids)
                 .stream()
                 .map(groupMapper::mapToGroupDTO)
@@ -44,7 +44,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public List<String> getAllGroupNames() {
-        logger.info("Getting all group names from {}", GroupDao.class);
+        logger.info("Getting all group names");
         return groupDao.getAllGroups()
                 .stream()
                 .map(Group::getName)
@@ -53,7 +53,7 @@ public class GroupsServiceImpl implements GroupsService {
 
     @Override
     public GroupDTO getGroupByName(String name) {
-        logger.info("Getting group by name {} from {}", name, GroupDao.class);
+        logger.info("Getting group by name {}", name);
         return groupMapper.mapToGroupDTO(groupDao.getGroupByName(name));
     }
 

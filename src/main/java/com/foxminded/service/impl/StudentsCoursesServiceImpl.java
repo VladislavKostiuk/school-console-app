@@ -23,31 +23,31 @@ public class StudentsCoursesServiceImpl implements StudentsCoursesService {
 
     @Override
     public List<Integer> getStudentsIdByCourseId(int courseId) {
-        logger.info("Getting student ids by course id {} from {}", courseId, StudentsCourseDao.class);
+        logger.info("Getting student ids by course id {}", courseId);
         return studentsCourseDao.getStudentIdsByCourseId(courseId);
     }
 
     @Override
     public boolean deleteStudentCoursesByStudentId(int studentId) {
-        logger.info("Deleting student courses by student id {} using {}", studentId, StudentsCourseDao.class);
+        logger.info("Deleting student courses by student id {}", studentId);
         return studentsCourseDao.deleteStudentCoursesByStudentId(studentId);
     }
 
     @Override
     public List<Integer> getCourseIdsByStudentId(int studentId) {
-        logger.info("Getting course ids by student id {} from {}", studentId, StudentsCourseDao.class);
+        logger.info("Getting course ids by student id {}", studentId);
         return studentsCourseDao.getCourseIdsByStudentId(studentId);
     }
 
     @Override
     public void addStudentToCourse(int studentId, int courseId) {
-        logger.info("Saving student id {} and course id {} using {}", studentId, courseId, StudentsCourseDao.class);
+        logger.info("Saving student id {} and course id {}", studentId, courseId);
         studentsCourseDao.addStudentToCourse(studentId, courseId);
     }
 
     @Override
     public boolean deleteStudentFromCourse(int studentId, int courseId) {
-        logger.info("Deleting student course with student id {} and course id {} using {}", studentId, courseId, StudentsCourseDao.class);
+        logger.info("Deleting student course with student id {} and course id {}", studentId, courseId);
         return studentsCourseDao.deleteStudentFromCourse(studentId, courseId);
     }
 

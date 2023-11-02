@@ -28,7 +28,6 @@ public class StudentsCourseDao {
 
 
     public void saveStudentsCourses(List<int[]> studentCourses) {
-        logger.info("Saving students courses to db");
         jdbcTemplate.batchUpdate("INSERT INTO students_courses(student_id, course_id) VALUES (?, ?)",
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -47,7 +46,6 @@ public class StudentsCourseDao {
     }
 
     public List<Integer> getStudentIdsByCourseId(int courseId) {
-        logger.info("Getting student ids by course id {} from db", courseId);
         return jdbcTemplate.query("SELECT student_id FROM students_courses WHERE course_id = ?",
                 resultSet -> {
                     if (!resultSet.isBeforeFirst()) {
@@ -59,12 +57,10 @@ public class StudentsCourseDao {
     }
 
     public boolean deleteStudentCoursesByStudentId(int studentId) {
-        logger.info("Deleting student courses by student id {} from db", studentId);
         return jdbcTemplate.update("DELETE FROM students_courses WHERE student_id = ?", studentId) != 0;
     }
 
     public List<Integer> getCourseIdsByStudentId(int studentId) {
-        logger.info("Getting course ids by student id {} from db", studentId);
         return jdbcTemplate.query("SELECT course_id FROM students_courses WHERE student_id = ?",
                 resultSet -> {
                     if (!resultSet.isBeforeFirst()) {
@@ -76,18 +72,15 @@ public class StudentsCourseDao {
     }
 
     public void addStudentToCourse(int studentId, int courseId) {
-        logger.info("Saving student id {} and course id {} to db", studentId, courseId);
         jdbcTemplate.update("INSERT INTO students_courses VALUES (?, ?)", studentId, courseId);
     }
 
     public boolean deleteStudentFromCourse(int studentId, int courseId) {
-        logger.info("Deleting student id {} and course id {} from db", studentId, courseId);
         return jdbcTemplate.update("DELETE FROM students_courses WHERE student_id = ? AND course_id = ?",
                 studentId, courseId) != 0;
     }
 
     public int getStudentCoursesAmount() {
-        logger.info("Getting students courses amount from db");
         return jdbcTemplate.queryForObject("SELECT COUNT(*) FROM students_courses", Integer.class);
     }
 

@@ -40,7 +40,6 @@ public class CourseDao {
 
     public void saveCourses(List<Course> courses) {
         String sql = "INSERT INTO courses(course_name, course_description) VALUES (?, ?)";
-        logger.info("Saving courses to db");
         jdbcTemplate.batchUpdate(sql,
                 new BatchPreparedStatementSetter() {
                     @Override
@@ -58,14 +57,12 @@ public class CourseDao {
 
     public Course getCourseById(int id) {
         String sql = "SELECT * FROM courses WHERE course_id = ?";
-        logger.info("Getting course by id {} from db", id);
         Course course = jdbcTemplate.query(sql, courseExtractor, id);
         return course;
     }
 
     public Course getCourseByName(String name) {
         String sql = "SELECT * FROM courses WHERE course_name = ?";
-        logger.info("Getting course by name {} from db", name);
         Course course = jdbcTemplate.query(sql, courseExtractor, name);
         return course;
     }
@@ -75,7 +72,6 @@ public class CourseDao {
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("ids", courseIds);
         List<Course> courses = namedParamJdbcTemplate.query(sql, parameterSource, courseRowMapper);
-        logger.info("Getting courses by ids: {} from db", courseIds);
 
         if (courses.size() != courseIds.size()) {
             throw new IllegalArgumentException(ErrorMessages.SOME_COURSES_WAS_NOT_FOUND);
@@ -86,7 +82,6 @@ public class CourseDao {
 
     public int getCoursesAmount() {
         String sql = "SELECT COUNT(*) FROM courses";
-        logger.info("Getting courses amount from db");
         int amount = jdbcTemplate.queryForObject(sql, Integer.class);
         return amount;
     }
