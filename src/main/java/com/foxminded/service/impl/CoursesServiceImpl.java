@@ -3,14 +3,12 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.CourseDao;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.mappers.CourseDTOMapper;
+import com.foxminded.enums.CourseName;
 import com.foxminded.service.CoursesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class CoursesServiceImpl implements CoursesService {
@@ -27,18 +25,9 @@ public class CoursesServiceImpl implements CoursesService {
     }
 
     @Override
-    public CourseDTO getCourseByName(String name) {
-        logger.info("Getting course by name {}", name);
-        return courseMapper.mapToCourseDTO(courseDao.getCourseByName(name));
-    }
-
-    @Override
-    public List<CourseDTO> getCoursesByIds(List<Integer> ids) {
-        logger.info("Getting courses by ids {}", ids);
-        return courseDao.getCoursesByIds(ids)
-                .stream()
-                .map(courseMapper::mapToCourseDTO)
-                .collect(toList());
+    public CourseDTO getCourseByName(CourseName courseName) {
+        logger.info("Getting course by name {}", courseName);
+        return courseMapper.mapToCourseDTO(courseDao.getCourseByName(courseName));
     }
 
 }

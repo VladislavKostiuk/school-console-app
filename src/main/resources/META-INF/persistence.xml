@@ -1,0 +1,13 @@
+<persistence-unit name="schoolDB">
+    <description>Hibernate EntityManager for school db</description>
+    <class>com.foxminded.domain.Course</class>
+    <class>com.foxminded.domain.Group</class>
+    <class>com.foxminded.domain.Student</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+        <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+        <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/school"/>
+        <property name="javax.persistence.jdbc.user" value="schoolAdmin"/>
+        <property name="javax.persistence.jdbc.password" value="12345"/>
+    </properties>
+</persistence-unit>

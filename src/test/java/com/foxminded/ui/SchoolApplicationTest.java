@@ -3,9 +3,8 @@ package com.foxminded.ui;
 import com.foxminded.domain.Student;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.GroupDTO;
-import com.foxminded.dto.StudentCourseDTO;
 import com.foxminded.dto.StudentDTO;
-import com.foxminded.dto.mappers.StudentCourseDTOMapper;
+import com.foxminded.dto.mappers.GroupDTOMapper;
 import com.foxminded.enums.CourseName;
 import com.foxminded.service.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,22 +29,18 @@ class SchoolApplicationTest {
     @Mock
     private GroupsService groupsService;
     @Mock
-    private StudentsCoursesService studentsCoursesService;
-    @Mock
     private StudentsService studentsService;
     @Mock
     private DatabaseInitService databaseInitService;
     private List<CourseDTO> testCourses;
     private List<GroupDTO> testGroups;
     private List<StudentDTO> testStudents;
-    private Map<Student, Integer> testStudentGroupId;
-    private StudentCourseDTOMapper studentCourseMapper;
-    private StudentCourseDTO studentWithCourses;
+    private GroupDTOMapper groupMapper;
 
     @BeforeEach
     void setUp() {
-        studentCourseMapper = new StudentCourseDTOMapper();
 
+        groupMapper = new GroupDTOMapper();
         CourseDTO course1 = new CourseDTO(
                 1,
                 CourseName.ART.toString(),
@@ -78,53 +73,47 @@ class SchoolApplicationTest {
 
         testGroups = new ArrayList<>(Arrays.asList(group1, group2));
 
+        List<String> courseNames = testCourses.stream().map(CourseDTO::name).collect(toList());
+
         StudentDTO student1 = new StudentDTO(
                 1,
                 1,
+                "group1",
                 "firstName1",
-                "lastName1"
+                "lastName1",
+                courseNames
         );
 
         StudentDTO student2 = new StudentDTO(
                 2,
                 1,
+                "group2",
                 "firstName2",
-                "lastName2"
+                "lastName2",
+                courseNames
         );
 
         testStudents = new ArrayList<>(Arrays.asList(student1, student2));
-        testStudentGroupId = new HashMap<>();
-
-        StudentDTO student = testStudents.get(0);
-        List<String> courseNames = testCourses.stream().map(CourseDTO::name).collect(toList());;
-        studentWithCourses = studentCourseMapper.mapToStudentCourseDTO(student, courseNames);
     }
 
     @Test
     void testFindGroupsByNumber_Success() {
-        List<Integer> idList = List.of(1, 2);
-        when(studentsService.getGroupIdsByStudentNumber(anyInt())).thenReturn(idList);
-        when(groupsService.getGroupsByIds(idList)).thenReturn(testGroups);
-
+        when(studentsService.getGroupsByStudentAmount(anyInt())).thenReturn(testGroups);
         List<GroupDTO> actualGroups = schoolApplication.findGroupsByNumber(25);
         assertEquals(testGroups, actualGroups);
-        verify(studentsService, times(1)).getGroupIdsByStudentNumber(25);
-        verify(groupsService, times(1)).getGroupsByIds(idList);
+        verify(studentsService, times(1)).getGroupsByStudentAmount(25);
     }
 
     @Test
     void testFindStudentsByCourse_Success() {
         CourseName testCourseName = CourseName.ART;
-        when(coursesService.getCourseByName(testCourseName.toString())).thenReturn(testCourses.get(0));
-        List<Integer> studentIdList = List.of(1, 2);
-        when(studentsCoursesService.getStudentsIdByCourseId(1)).thenReturn(studentIdList);
-        when(studentsService.getStudentsByIds(studentIdList)).thenReturn(testStudents);
+        when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourses.get(0));
+        when(studentsService.getStudentsByCourse(testCourses.get(0))).thenReturn(testStudents);
 
         List<StudentDTO> actualStudents = schoolApplication.findStudentsByCourse(testCourseName);
         assertEquals(testStudents, actualStudents);
-        verify(coursesService, times(1)).getCourseByName(testCourseName.toString());
-        verify(studentsCoursesService, times(1)).getStudentsIdByCourseId(1);
-        verify(studentsService, times(1)).getStudentsByIds(studentIdList);
+        verify(coursesService, times(1)).getCourseByName(testCourseName);
+        verify(studentsService, times(1)).getStudentsByCourse(testCourses.get(0));
     }
 
     @Test
@@ -132,15 +121,15 @@ class SchoolApplicationTest {
         String groupName = "group1";
         String firstName = "firstName";
         String lastName = "lastName";
-        when(groupsService.getAllGroupNames()).thenReturn(
-                testGroups.stream().map(GroupDTO::name).collect(toList())
+        when(groupsService.getAllGroups()).thenReturn(
+                testGroups.stream().map(groupMapper::mapToGroup).toList()
         );
 
         when(groupsService.getGroupByName(groupName)).thenReturn(testGroups.get(0));
         schoolApplication.addStudent(firstName, lastName, groupName);
 
         verify(groupsService, times(1)).getGroupByName(groupName);
-        verify(studentsService, times(1)).saveStudent(firstName, lastName, testGroups.get(0).id());
+        verify(studentsService, times(1)).saveStudent(firstName, lastName, testGroups.get(0));
     }
 
     @Test
@@ -156,8 +145,8 @@ class SchoolApplicationTest {
         String groupName = "non-existent group name";
         String firstName = "firstName";
         String lastName = "lastName";
-        when(groupsService.getAllGroupNames()).thenReturn(
-                testGroups.stream().map(GroupDTO::name).collect(toList())
+        when(groupsService.getAllGroups()).thenReturn(
+                testGroups.stream().map(groupMapper::mapToGroup).toList()
         );
 
         assertThrows(IllegalArgumentException.class, () -> schoolApplication.addStudent(firstName, lastName, groupName));
@@ -168,13 +157,12 @@ class SchoolApplicationTest {
         int id = 1;
         when(studentsService.deleteStudentById(id)).thenReturn(true);
         assertTrue(schoolApplication.deleteStudentById(id));
-        verify(studentsCoursesService, times(1)).deleteStudentCoursesByStudentId(id);
         verify(studentsService, times(1)).deleteStudentById(id);
     }
 
     @Test
     void testAddStudentToCourse_Success() {
-        String testCourseName = CourseName.MEDICINE.toString();
+        CourseName testCourseName = CourseName.MEDICINE;
         CourseDTO testCourse = new CourseDTO(
                 4,
                 CourseName.MEDICINE.toString(),
@@ -182,44 +170,40 @@ class SchoolApplicationTest {
         );
         when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourse);
 
-        schoolApplication.addStudentToCourse(studentWithCourses, testCourseName);
+        schoolApplication.addStudentToCourse(testStudents.get(0), CourseName.MEDICINE.toString());
         verify(coursesService, times(1)).getCourseByName(testCourseName);
-        verify(studentsCoursesService, times(1)).addStudentToCourse(1, 4);
+        verify(studentsService, times(1)).addStudentToCourse(testStudents.get(0), testCourse);
     }
 
     @Test
     void testAddStudentToCourse_CourseWithThatNameDoesNotExist() {
         assertThrows(IllegalArgumentException.class,
-                () -> schoolApplication.addStudentToCourse(studentWithCourses, "non-existent course name"));
+                () -> schoolApplication.addStudentToCourse(testStudents.get(0), "non-existent course name"));
     }
 
     @Test
     void testAddStudentToCourse_StudentAlreadyHasThatCourse() {
         assertThrows(IllegalArgumentException.class,
-                () -> schoolApplication.addStudentToCourse(studentWithCourses, "MATH"));
+                () -> schoolApplication.addStudentToCourse(testStudents.get(0), "MATH"));
     }
 
     @Test
     void testDeleteStudentFromCourse_Success() {
-        String testCourseName = CourseName.ART.toString();
-        int coursesAmountBeforeDelete = studentWithCourses.courses().size();
+        CourseName testCourseName = CourseName.ART;
+        int coursesAmountBeforeDelete = testStudents.get(0).courses().size();
 
         when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourses.get(0));
-        when(studentsCoursesService.deleteStudentFromCourse(studentWithCourses.id(), 1)).then(invocationOnMock -> {
-            studentWithCourses.courses().remove(1);
-            return true;
-        });
-        assertTrue(schoolApplication.deleteStudentFromCourse(studentWithCourses, testCourseName));
-        assertNotEquals(coursesAmountBeforeDelete, studentWithCourses.courses().size());
+        when(studentsService.deleteStudentFromCourse(testStudents.get(0), testCourses.get(0))).thenReturn(true);
+        assertTrue(schoolApplication.deleteStudentFromCourse(testStudents.get(0), testCourseName.toString()));
 
         verify(coursesService, times(1)).getCourseByName(testCourseName);
-        verify(studentsCoursesService, times(1)).deleteStudentFromCourse(studentWithCourses.id(), 1);
+        verify(studentsService, times(1)).deleteStudentFromCourse(testStudents.get(0), testCourses.get(0));
     }
 
     @Test
     void testDeleteStudentFromCourse_CourseWithThatNameDoesNotExist() {
         assertThrows(IllegalArgumentException.class,
-                () -> schoolApplication.deleteStudentFromCourse(studentWithCourses, "non-existent course name"));
+                () -> schoolApplication.deleteStudentFromCourse(testStudents.get(0), "non-existent course name"));
 
     }
 
@@ -228,35 +212,26 @@ class SchoolApplicationTest {
         String testCourseName = CourseName.MEDICINE.toString();
 
         assertThrows(IllegalArgumentException.class,
-                () -> schoolApplication.deleteStudentFromCourse(studentWithCourses, testCourseName));
+                () -> schoolApplication.deleteStudentFromCourse(testStudents.get(0), testCourseName));
 
     }
 
     @Test
     void testGetAllGroupNames_Success() {
         List<String> allGroupNames = testGroups.stream().map(GroupDTO::name).collect(toList());
-        when(groupsService.getAllGroupNames()).thenReturn(allGroupNames);
+        when(groupsService.getAllGroups()).thenReturn(testGroups.stream().map(groupMapper::mapToGroup).toList());
 
         assertEquals(allGroupNames, schoolApplication.getAllGroupNames());
-        verify(groupsService, times(1)).getAllGroupNames();
+        verify(groupsService, times(1)).getAllGroups();
     }
 
     @Test
     void testGetStudentById_Success() {
         StudentDTO testStudent = testStudents.get(0);
-        List<Integer> courseIdList = new ArrayList<>(Arrays.asList(1, 2, 3));
-
         when(studentsService.getStudentById(1)).thenReturn(testStudent);
-        when(studentsCoursesService.getCourseIdsByStudentId(testStudent.id())).thenReturn(courseIdList);
-        when(coursesService.getCoursesByIds(courseIdList)).thenReturn(testCourses);
-
-        StudentCourseDTO actualStudent = schoolApplication.getStudentById(1);
-        assertEquals(studentWithCourses, actualStudent);
-        assertEquals(studentWithCourses.courses(), actualStudent.courses());
-
+        StudentDTO actualStudent = schoolApplication.getStudentById(1);
+        assertEquals(testStudent, actualStudent);
         verify(studentsService, times(1)).getStudentById(1);
-        verify(studentsCoursesService, times(1)).getCourseIdsByStudentId(testStudent.id());
-        verify(coursesService, times(1)).getCoursesByIds(courseIdList);
     }
 
 }

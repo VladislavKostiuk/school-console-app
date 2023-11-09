@@ -38,26 +38,7 @@ class GroupsServiceImplTest {
     }
 
     @Test
-    void testGetGroupsByIds_Success() {
-        Group group1 = new Group();
-        group1.setId(1);
-        group1.setName("name1");
-
-        Group group2 = new Group();
-        group2.setId(2);
-        group2.setName("name2");
-
-        List<Group> groupList = List.of(group1, group2);
-        doReturn(groupList).when(groupDao).getGroupsByIds(List.of(1, 2));
-        List<GroupDTO> actualList = groupsService.getGroupsByIds(List.of(1, 2));
-        List<GroupDTO> expectedList = groupList.stream().map(groupMapper::mapToGroupDTO).toList();
-
-        assertEquals(expectedList, actualList);
-        verify(groupDao, times(1)).getGroupsByIds(List.of(1, 2));
-    }
-
-    @Test
-    void testGetAllGroupNames_Success() {
+    void testGetAllGroups_Success() {
         Group group1 = new Group();
         group1.setId(1);
         group1.setName("name1");
@@ -67,7 +48,7 @@ class GroupsServiceImplTest {
         group2.setName("name2");
 
         when(groupDao.getAllGroups()).thenReturn(List.of(group1, group2));
-        assertEquals(List.of("name1", "name2"), groupsService.getAllGroupNames());
+        assertEquals(List.of(group1, group2), groupsService.getAllGroups());
         verify(groupDao, times(1)).getAllGroups();
     }
 

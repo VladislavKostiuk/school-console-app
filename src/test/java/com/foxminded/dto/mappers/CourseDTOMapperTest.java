@@ -10,30 +10,47 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CourseDTOMapperTest {
     private CourseDTOMapper courseMapper;
+    private Course testCourse;
+    private CourseDTO testCourseDTO;
 
     @BeforeEach
     void init() {
         courseMapper = new CourseDTOMapper();
-    }
 
-    @Test
-    void testMapToCourseDTO_Success() {
         int id = 1;
         CourseName name = CourseName.ART;
         String description = "desc";
 
-        Course course = new Course();
-        course.setId(id);
-        course.setName(name);
-        course.setDescription(description);
+        testCourse = new Course();
+        testCourse.setId(id);
+        testCourse.setName(name);
+        testCourse.setDescription(description);
 
-        CourseDTO expectedCourseDTO = new CourseDTO(
+        testCourseDTO = new CourseDTO(
                 id,
                 name.toString(),
                 description
         );
+    }
 
-        assertEquals(expectedCourseDTO, courseMapper.mapToCourseDTO(course));
+    @Test
+    void testMapToCourseDTO_Success() {
+        assertEquals(testCourseDTO, courseMapper.mapToCourseDTO(testCourse));
+    }
+
+    @Test
+    void testMapToCourse_Success() {
+        assertEquals(testCourse, courseMapper.mapToCourse(testCourseDTO));
+    }
+
+    @Test
+    void testMapToCourse_CourseWithThatNameDoesNotExist() {
+        testCourseDTO = new CourseDTO(
+                1,
+                "non-existent course name",
+                "desc"
+        );
+        assertThrows(IllegalArgumentException.class, () -> courseMapper.mapToCourse(testCourseDTO));
     }
 
 }

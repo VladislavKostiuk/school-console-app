@@ -10,9 +10,9 @@ import java.util.Map;
 
 public interface GroupsService {
 
-    List<GroupDTO> getGroupsByIds(List<Integer> ids);
+//    List<GroupDTO> getGroupsByIds(List<Integer> ids);
 
-    List<String> getAllGroupNames();
+    List<Group> getAllGroups();
 
     GroupDTO getGroupByName(String name);
 

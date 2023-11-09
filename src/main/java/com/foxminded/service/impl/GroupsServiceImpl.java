@@ -2,22 +2,14 @@ package com.foxminded.service.impl;
 
 import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Group;
-import com.foxminded.domain.Student;
 import com.foxminded.dto.GroupDTO;
-import com.foxminded.dto.StudentDTO;
 import com.foxminded.dto.mappers.GroupDTOMapper;
-import com.foxminded.dto.mappers.StudentDTOMapper;
 import com.foxminded.service.GroupsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class GroupsServiceImpl implements GroupsService {
@@ -34,21 +26,9 @@ public class GroupsServiceImpl implements GroupsService {
     }
 
     @Override
-    public List<GroupDTO> getGroupsByIds(List<Integer> ids) {
-        logger.info("Getting groups by ids: {}", ids);
-        return groupDao.getGroupsByIds(ids)
-                .stream()
-                .map(groupMapper::mapToGroupDTO)
-                .collect(toList());
-    }
-
-    @Override
-    public List<String> getAllGroupNames() {
+    public List<Group> getAllGroups() {
         logger.info("Getting all group names");
-        return groupDao.getAllGroups()
-                .stream()
-                .map(Group::getName)
-                .collect(Collectors.toList());
+        return groupDao.getAllGroups();
     }
 
     @Override

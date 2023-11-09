@@ -12,4 +12,12 @@ public class GroupDTOMapper {
         );
     }
 
+    public Group mapToGroup(GroupDTO groupDTO) {
+        Group group = new Group();
+        group.setId(groupDTO.id());
+        group.setName(groupDTO.name());
+
+        return group;
+    }
+
 }

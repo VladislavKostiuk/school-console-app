@@ -31,10 +31,10 @@ class CoursesServiceImplTest {
 
     @Test
     void testGetCourseByName_Success() {
-        String courseName = CourseName.ART.toString();
+        CourseName courseName = CourseName.ART;
         Course course1 = new Course();
         course1.setId(1);
-        course1.setName(CourseName.ART);
+        course1.setName(courseName);
 
         doReturn(course1).when(courseDao).getCourseByName(courseName);
         CourseDTO actualCourse = courseMapper.mapToCourseDTO(course1);
@@ -42,22 +42,6 @@ class CoursesServiceImplTest {
         verify(courseDao, times(1)).getCourseByName(courseName);
     }
 
-    @Test
-    void testGetCoursesByIds_Success() {
-        Course course1 = new Course();
-        course1.setId(1);
-        course1.setName(CourseName.ART);
 
-        Course course2 = new Course();
-        course2.setId(2);
-        course2.setName(CourseName.MATH);
-
-        List<Course> expectedList = List.of(course1, course2);
-        doReturn(expectedList).when(courseDao).getCoursesByIds(List.of(1, 2));
-        List<Course> actualList = courseDao.getCoursesByIds(List.of(1, 2));
-
-        assertEquals(expectedList, actualList);
-        verify(courseDao, times(1)).getCoursesByIds(List.of(1, 2));
-    }
 
 }

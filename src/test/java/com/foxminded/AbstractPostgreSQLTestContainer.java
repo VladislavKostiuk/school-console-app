@@ -1,33 +1,29 @@
 package com.foxminded;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-@JdbcTest
+@DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ContextConfiguration(initializers = AbstractPostgreSQLTestContainer.Initializer.class)
 public abstract class AbstractPostgreSQLTestContainer {
-    private static final String CONTAINER_VERSION = "postgres:latest";
+    public static final String CONTAINER_VERSION = "postgres:latest";
     public static final PostgreSQLContainer<?> postgres;
-    public static final DriverManagerDataSource testDatasource;
+    @PersistenceContext
+    public EntityManager entityManager;
 
     static {
         postgres = new PostgreSQLContainer<>(CONTAINER_VERSION);
         postgres.start();
-
-        testDatasource = new DriverManagerDataSource();
-        testDatasource.setDriverClassName(postgres.getDriverClassName());
-        testDatasource.setUrl(postgres.getJdbcUrl());
-        testDatasource.setUsername(postgres.getUsername());
-        testDatasource.setPassword(postgres.getPassword());
     }
 
     static class Initializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {

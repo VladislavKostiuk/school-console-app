@@ -1,14 +1,35 @@
 package com.foxminded.domain;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "students")
 public class Student {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "student_id")
     private int id;
+
+    @ManyToOne
+    @JoinColumn(name = "group_id")
     private Group group;
+
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "students_courses",
+            joinColumns = @JoinColumn(name = "student_id"),
+            inverseJoinColumns = @JoinColumn(name = "course_id")
+    )
     private List<Course> courses;
 
     public Student() {
@@ -58,9 +79,10 @@ public class Student {
     @Override
     public String toString() {
         return "Student(id: " + id +
-                " group: " + (group != null ? group.getName() : "") +
+                " group: " + (group != null ? group : "") +
                 ", first name: " + firstName +
                 ", last name: " + lastName +
+                ", courses: " + courses +
                 ")";
     }
 

@@ -3,7 +3,6 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.CourseDao;
 import com.foxminded.dao.GroupDao;
 import com.foxminded.dao.StudentDao;
-import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
@@ -13,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Random;
 
@@ -23,7 +22,6 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
     private final StudentDao studentDao;
     private final CourseDao courseDao;
     private final GroupDao groupDao;
-    private final StudentsCourseDao studentsCourseDao;
     private final TestDataGenerator testDataGenerator;
     private final Random random;
     private final Logger logger;
@@ -32,12 +30,10 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
     public DatabaseInitServiceImpl(StudentDao studentDao,
                                    CourseDao courseDao,
                                    GroupDao groupDao,
-                                   StudentsCourseDao studentsCourseDao,
                                    TestDataGenerator testDataGenerator) {
         this.studentDao = studentDao;
         this.courseDao = courseDao;
         this.groupDao = groupDao;
-        this.studentsCourseDao = studentsCourseDao;
         this.testDataGenerator = testDataGenerator;
         random = new Random();
         logger = LoggerFactory.getLogger(DatabaseInitServiceImpl.class);
@@ -65,18 +61,6 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
         if (studentDao.getStudentsAmount() == 0) {
             logger.info("Saving test students if students table is empty");
             studentDao.saveStudents(students);
-        }
-
-        if (studentsCourseDao.getStudentCoursesAmount() == 0) {
-            logger.info("Saving test students courses if students_courses table is empty");
-            List<int[]> studentsCourses = new ArrayList<>();
-            for (var student : students) {
-                for (var course : student.getCourses()) {
-                    studentsCourses.add(new int[] {student.getId(), course.getId()});
-                }
-            }
-
-            studentsCourseDao.saveStudentsCourses(studentsCourses);
         }
     }
 

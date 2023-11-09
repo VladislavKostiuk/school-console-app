@@ -1,8 +1,17 @@
 package com.foxminded.domain;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "groups")
 public class Group {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "group_id")
     private int id;
+
+    @Column(name = "group_name", nullable = false, unique = true)
     private String name;
     public int getId() {
         return id;

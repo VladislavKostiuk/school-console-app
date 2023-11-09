@@ -10,27 +10,34 @@ import static org.junit.jupiter.api.Assertions.*;
 class GroupDTOMapperTest {
 
     private GroupDTOMapper groupMapper;
+    private Group testGroup;
+    private GroupDTO testGroupDTO;
 
     @BeforeEach
     void init() {
         groupMapper = new GroupDTOMapper();
+
+        int id = 1;
+        String name = "group name";
+
+        testGroup = new Group();
+        testGroup.setId(id);
+        testGroup.setName(name);
+
+        testGroupDTO = new GroupDTO(
+                id,
+                name
+        );
     }
 
     @Test
     void testMapToGroupDTO_Success() {
-        int id = 1;
-        String name = "group name";
+        assertEquals(testGroupDTO, groupMapper.mapToGroupDTO(testGroup));
+    }
 
-        Group group = new Group();
-        group.setId(id);
-        group.setName(name);
-
-        GroupDTO groupDTO = new GroupDTO(
-                id,
-                name
-        );
-
-        assertEquals(groupDTO, groupMapper.mapToGroupDTO(group));
+    @Test
+    void testMapToGroup() {
+        assertEquals(testGroup, groupMapper.mapToGroup(testGroupDTO));
     }
 
 }
