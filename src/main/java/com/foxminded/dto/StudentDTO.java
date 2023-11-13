@@ -1,10 +1,13 @@
 package com.foxminded.dto;
 
+import java.util.List;
+
 public record StudentDTO (
 
         int id,
-        int groupId,
+        GroupDTO groupDTO,
         String firstName,
-        String lastName
+        String lastName,
+        List<CourseDTO> coursesDTO
 
 ) {}

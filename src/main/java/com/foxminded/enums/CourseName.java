@@ -1,5 +1,7 @@
 package com.foxminded.enums;
 
+import com.foxminded.constants.ErrorMessages;
+
 public enum CourseName {
     MATH,
     BIOLOGY,
@@ -10,5 +12,13 @@ public enum CourseName {
     SCIENCE,
     MANAGEMENT,
     ECONOMICS,
-    MEDICINE
+    MEDICINE;
+
+    public static CourseName convertStringToCourseName(String name) {
+        try {
+            return CourseName.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(String.format(ErrorMessages.COURSE_DOES_NOT_EXIST, name));
+        }
+    }
 }

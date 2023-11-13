@@ -3,16 +3,11 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.CourseDao;
 import com.foxminded.dao.GroupDao;
 import com.foxminded.dao.StudentDao;
-import com.foxminded.dao.StudentsCourseDao;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.enums.CourseName;
 import com.foxminded.helper.TestDataGenerator;
-import com.foxminded.service.CoursesService;
-import com.foxminded.service.GroupsService;
-import com.foxminded.service.StudentsCoursesService;
-import com.foxminded.service.StudentsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,11 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,8 +33,6 @@ class DatabaseInitServiceImplTest {
     private CourseDao courseDao;
     @Mock
     private GroupDao groupDao;
-    @Mock
-    private StudentsCourseDao studentsCourseDao;
     @Mock
     private TestDataGenerator testDataGenerator;
     private List<Course> testCourses;
@@ -93,7 +86,6 @@ class DatabaseInitServiceImplTest {
         when(groupDao.getGroupsAmount()).thenReturn(0);
         when(courseDao.getCoursesAmount()).thenReturn(0);
         when(studentDao.getStudentsAmount()).thenReturn(0);
-        when(studentsCourseDao.getStudentCoursesAmount()).thenReturn(0);
 
         databaseInitService.init(3, 2, 2);
 
@@ -104,12 +96,10 @@ class DatabaseInitServiceImplTest {
         verify(groupDao, times(1)).getGroupsAmount();
         verify(courseDao, times(1)).getCoursesAmount();
         verify(studentDao, times(1)).getStudentsAmount();
-        verify(studentsCourseDao, times(1)).getStudentCoursesAmount();
 
         verify(groupDao, times(1)).saveGroups(testGroups);
         verify(courseDao, times(1)).saveCourses(testCourses);
         verify(studentDao, times(1)).saveStudents(testStudents);
-        verify(studentsCourseDao, times(1)).saveStudentsCourses(anyList());
 
         for (var student : testStudents) {
             assertNotNull(student.getGroup());
