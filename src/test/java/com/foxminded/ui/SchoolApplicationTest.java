@@ -1,10 +1,9 @@
 package com.foxminded.ui;
 
-import com.foxminded.domain.Student;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.GroupDTO;
 import com.foxminded.dto.StudentDTO;
-import com.foxminded.dto.mappers.GroupDTOMapper;
+import com.foxminded.mappers.GroupMapper;
 import com.foxminded.enums.CourseName;
 import com.foxminded.service.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +12,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
 import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,12 +37,12 @@ class SchoolApplicationTest {
     private List<CourseDTO> testCourses;
     private List<GroupDTO> testGroups;
     private List<StudentDTO> testStudents;
-    private GroupDTOMapper groupMapper;
+
+    private GroupMapper groupMapper;
 
     @BeforeEach
     void setUp() {
-
-        groupMapper = new GroupDTOMapper();
+        groupMapper = GroupMapper.INSTANCE;
         CourseDTO course1 = new CourseDTO(
                 1,
                 CourseName.ART.toString(),
@@ -73,24 +75,20 @@ class SchoolApplicationTest {
 
         testGroups = new ArrayList<>(Arrays.asList(group1, group2));
 
-        List<String> courseNames = testCourses.stream().map(CourseDTO::name).collect(toList());
-
         StudentDTO student1 = new StudentDTO(
                 1,
-                1,
-                "group1",
+                new GroupDTO(1, "group1"),
                 "firstName1",
                 "lastName1",
-                courseNames
+                testCourses
         );
 
         StudentDTO student2 = new StudentDTO(
                 2,
-                1,
-                "group2",
+                new GroupDTO(1, "group1"),
                 "firstName2",
                 "lastName2",
-                courseNames
+                testCourses
         );
 
         testStudents = new ArrayList<>(Arrays.asList(student1, student2));
@@ -190,7 +188,7 @@ class SchoolApplicationTest {
     @Test
     void testDeleteStudentFromCourse_Success() {
         CourseName testCourseName = CourseName.ART;
-        int coursesAmountBeforeDelete = testStudents.get(0).courses().size();
+        int coursesAmountBeforeDelete = testStudents.get(0).coursesDTO().size();
 
         when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourses.get(0));
         when(studentsService.deleteStudentFromCourse(testStudents.get(0), testCourses.get(0))).thenReturn(true);

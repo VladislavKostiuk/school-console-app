@@ -1,5 +1,6 @@
 package com.foxminded.ui;
 
+import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.GroupDTO;
@@ -106,10 +107,11 @@ public class SchoolApplication {
 
     public void addStudentToCourse(StudentDTO studentDTO, String stringCourseName) {
         logger.info("Start saving student {} {} to course {}", studentDTO.firstName(), studentDTO.lastName(), stringCourseName);
-        CourseName courseName = convertStringToCourseName(stringCourseName);
-        List<String> studentCourses = studentDTO.courses();
+        CourseName courseName = CourseName.convertStringToCourseName(stringCourseName);
+        List<CourseDTO> studentCourseDTOs = studentDTO.coursesDTO();
+        List<String> studentCourseNames = studentCourseDTOs.stream().map(CourseDTO::name).toList();
 
-        if (studentCourses.contains(stringCourseName)) {
+        if (studentCourseNames.contains(stringCourseName)) {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_ALREADY_HAS_THAT_COURSE, courseName));
         }
 
@@ -121,10 +123,11 @@ public class SchoolApplication {
 
     public boolean deleteStudentFromCourse(StudentDTO studentDTO, String stringCourseName) {
         logger.info("Start deleting student {} {} from course {}", studentDTO.firstName(), studentDTO.lastName(), stringCourseName);
-        CourseName courseName = convertStringToCourseName(stringCourseName);
-        List<String> studentCourses = studentDTO.courses();
+        CourseName courseName = CourseName.convertStringToCourseName(stringCourseName);
+        List<CourseDTO> studentCourseDTOs = studentDTO.coursesDTO();
+        List<String> studentCourseNames = studentCourseDTOs.stream().map(CourseDTO::name).toList();
 
-        if (!studentCourses.contains(stringCourseName)) {
+        if (!studentCourseNames.contains(stringCourseName)) {
             throw new IllegalArgumentException(String.format(ErrorMessages.STUDENT_DOES_NOT_HAVE_THAT_COURSE, courseName));
         }
 
@@ -156,7 +159,7 @@ public class SchoolApplication {
     private void printStudentsByCourse(Scanner console) {
         System.out.println("Print course name from the list below: ");
         printAllCourseNames();
-        CourseName courseName = convertStringToCourseName(console.nextLine());
+        CourseName courseName = CourseName.convertStringToCourseName(console.nextLine());
 
         List<StudentDTO> students = findStudentsByCourse(courseName);
         logger.info("Printing students");
@@ -227,7 +230,7 @@ public class SchoolApplication {
     }
 
     private void printCurrentStudentCourses(StudentDTO student) {
-        List<String> studentCourses = student.courses();
+        List<String> studentCourses = student.coursesDTO().stream().map(CourseDTO::name).toList();
         System.out.println("Students current courses:");
         printCourseNames(studentCourses);
     }
@@ -259,14 +262,6 @@ public class SchoolApplication {
     private void printCourseNames (List<String> courses) {
         for (var course : courses) {
             System.out.println(course);
-        }
-    }
-
-    private CourseName convertStringToCourseName(String name) {
-        try {
-            return CourseName.valueOf(name.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(String.format(ErrorMessages.COURSE_WAS_NOT_FOUND, name));
         }
     }
 

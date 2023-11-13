@@ -3,7 +3,7 @@ package com.foxminded.service.impl;
 import com.foxminded.dao.GroupDao;
 import com.foxminded.domain.Group;
 import com.foxminded.dto.GroupDTO;
-import com.foxminded.dto.mappers.GroupDTOMapper;
+import com.foxminded.mappers.GroupMapper;
 import com.foxminded.service.GroupsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +15,13 @@ import java.util.List;
 public class GroupsServiceImpl implements GroupsService {
 
     private final GroupDao groupDao;
-    private final GroupDTOMapper groupMapper;
+    private final GroupMapper groupMapper;
     private final Logger logger;
 
     @Autowired
     public GroupsServiceImpl(GroupDao groupDao) {
         this.groupDao = groupDao;
-        groupMapper = new GroupDTOMapper();
+        this.groupMapper = GroupMapper.INSTANCE;
         logger = LoggerFactory.getLogger(GroupsServiceImpl.class);
     }
 

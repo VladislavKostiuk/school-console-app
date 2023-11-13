@@ -5,10 +5,9 @@ import java.util.List;
 public record StudentDTO (
 
         int id,
-        int groupId,
-        String groupName,
+        GroupDTO groupDTO,
         String firstName,
         String lastName,
-        List<String> courses
+        List<CourseDTO> coursesDTO
 
 ) {}

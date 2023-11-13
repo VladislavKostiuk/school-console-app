@@ -1,16 +1,15 @@
 package com.foxminded.dao;
 
-import com.foxminded.AbstractPostgreSQLTestContainer;
+import com.foxminded.AbstractDaoTest;
 import com.foxminded.domain.Group;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GroupDaoTest extends AbstractPostgreSQLTestContainer {
+class GroupDaoTest extends AbstractDaoTest {
 
     private GroupDao groupDao;
     private Group testGroup1;

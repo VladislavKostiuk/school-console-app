@@ -2,21 +2,25 @@ package com.foxminded.dto.mappers;
 
 import com.foxminded.domain.Group;
 import com.foxminded.dto.GroupDTO;
+import com.foxminded.mappers.GroupMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class GroupDTOMapperTest {
 
-    private GroupDTOMapper groupMapper;
+class GroupMapperTest {
+
+    private GroupMapper groupMapper;
     private Group testGroup;
     private GroupDTO testGroupDTO;
 
     @BeforeEach
     void init() {
-        groupMapper = new GroupDTOMapper();
-
+        groupMapper = GroupMapper.INSTANCE;
         int id = 1;
         String name = "group name";
 

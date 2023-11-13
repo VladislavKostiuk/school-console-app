@@ -18,15 +18,12 @@ public class StudentDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-    private final Logger logger;
 
     public StudentDao() {
-        logger = LoggerFactory.getLogger(StudentDao.class);
     }
 
     public StudentDao(EntityManager entityManager) {
         this.entityManager = entityManager;
-        logger = LoggerFactory.getLogger(StudentDao.class);
     }
 
     public void saveStudents(List<Student> students) {

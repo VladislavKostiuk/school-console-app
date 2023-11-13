@@ -3,20 +3,23 @@ package com.foxminded.dto.mappers;
 import com.foxminded.domain.Course;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.enums.CourseName;
+import com.foxminded.mappers.CourseMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CourseDTOMapperTest {
-    private CourseDTOMapper courseMapper;
+class CourseMapperTest {
+//    @Autowired
+    private CourseMapper courseMapper;
     private Course testCourse;
     private CourseDTO testCourseDTO;
 
     @BeforeEach
     void init() {
-        courseMapper = new CourseDTOMapper();
-
+        courseMapper = CourseMapper.INSTANCE ;
         int id = 1;
         CourseName name = CourseName.ART;
         String description = "desc";

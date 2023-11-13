@@ -6,21 +6,20 @@ import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.dto.GroupDTO;
 import com.foxminded.dto.StudentDTO;
-import com.foxminded.dto.mappers.CourseDTOMapper;
-import com.foxminded.dto.mappers.GroupDTOMapper;
-import com.foxminded.dto.mappers.StudentDTOMapper;
+import com.foxminded.mappers.CourseMapper;
+import com.foxminded.mappers.GroupMapper;
+import com.foxminded.mappers.StudentMapper;
 import com.foxminded.enums.CourseName;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,18 +32,17 @@ class StudentsServiceImplTest {
     private StudentsServiceImpl studentsService;
     @Mock
     private StudentDao studentDao;
-    private StudentDTOMapper studentMapper;
-    private GroupDTOMapper groupMapper;
-    private CourseDTOMapper courseMapper;
+    private StudentMapper studentMapper;
+    private GroupMapper groupMapper;
+    private CourseMapper courseMapper;
     private Student testStudent;
     private Course testCourse;
 
     @BeforeEach
     void setUp() {
-        studentMapper = new StudentDTOMapper();
-        groupMapper = new GroupDTOMapper();
-        courseMapper = new CourseDTOMapper();
-
+        studentMapper = StudentMapper.INSTANCE;
+        groupMapper = GroupMapper.INSTANCE;
+        courseMapper = CourseMapper.INSTANCE;
         Group group = new Group();
         group.setId(1);
 

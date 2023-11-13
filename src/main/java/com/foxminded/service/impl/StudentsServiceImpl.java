@@ -6,9 +6,9 @@ import com.foxminded.domain.Student;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.GroupDTO;
 import com.foxminded.dto.StudentDTO;
-import com.foxminded.dto.mappers.CourseDTOMapper;
-import com.foxminded.dto.mappers.GroupDTOMapper;
-import com.foxminded.dto.mappers.StudentDTOMapper;
+import com.foxminded.mappers.CourseMapper;
+import com.foxminded.mappers.GroupMapper;
+import com.foxminded.mappers.StudentMapper;
 import com.foxminded.service.StudentsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +20,17 @@ import java.util.List;
 public class StudentsServiceImpl implements StudentsService {
 
     private final StudentDao studentDao;
-    private final StudentDTOMapper studentMapper;
-    private final GroupDTOMapper groupMapper;
-    private final CourseDTOMapper courseMapper;
+    private final StudentMapper studentMapper;
+    private final GroupMapper groupMapper;
+    private final CourseMapper courseMapper;
     private final Logger logger;
 
     @Autowired
     public StudentsServiceImpl(StudentDao studentDao) {
         this.studentDao = studentDao;
-        studentMapper = new StudentDTOMapper();
-        groupMapper = new GroupDTOMapper();
-        courseMapper = new CourseDTOMapper();
+        this.studentMapper = StudentMapper.INSTANCE;
+        this.groupMapper = GroupMapper.INSTANCE;
+        this.courseMapper = CourseMapper.INSTANCE;
         logger = LoggerFactory.getLogger(StudentsServiceImpl.class);
     }
 

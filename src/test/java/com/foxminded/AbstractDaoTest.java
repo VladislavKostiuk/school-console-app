@@ -14,8 +14,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @Testcontainers
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@ContextConfiguration(initializers = AbstractPostgreSQLTestContainer.Initializer.class)
-public abstract class AbstractPostgreSQLTestContainer {
+@ContextConfiguration(initializers = AbstractDaoTest.Initializer.class)
+public abstract class AbstractDaoTest {
     public static final String CONTAINER_VERSION = "postgres:latest";
     public static final PostgreSQLContainer<?> postgres;
     @PersistenceContext

@@ -5,20 +5,28 @@ import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.dto.StudentDTO;
 import com.foxminded.enums.CourseName;
+import com.foxminded.mappers.CourseMapper;
+import com.foxminded.mappers.GroupMapper;
+import com.foxminded.mappers.StudentMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class StudentDTOMapperTest {
-    private StudentDTOMapper studentMapper;
+class StudentMapperTest {
+    private StudentMapper studentMapper;
+    private GroupMapper groupMapper;
+    private CourseMapper courseMapper;
     private Student testStudent;
     private StudentDTO testStudentDTO;
 
     @BeforeEach
     void init() {
-        studentMapper = new StudentDTOMapper();
-
+        studentMapper = StudentMapper.INSTANCE;
+        groupMapper = GroupMapper.INSTANCE;
+        courseMapper = CourseMapper.INSTANCE;
         Group group = new Group();
         group.setId(1);
         group.setName("qw-12");
@@ -35,14 +43,12 @@ class StudentDTOMapperTest {
 
         testStudentDTO = new StudentDTO(
                 id,
-                group.getId(),
-                group.getName(),
+                groupMapper.mapToGroupDTO(group),
                 firstName,
                 lastName,
                 testStudent.getCourses()
                         .stream()
-                        .map(Course::getName)
-                        .map(CourseName::toString)
+                        .map(courseMapper::mapToCourseDTO)
                         .toList()
         );
     }

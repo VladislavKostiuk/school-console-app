@@ -1,25 +1,20 @@
 package com.foxminded.service.impl;
 
 import com.foxminded.dao.GroupDao;
-import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
-import com.foxminded.domain.Student;
 import com.foxminded.dto.GroupDTO;
-import com.foxminded.dto.mappers.GroupDTOMapper;
-import com.foxminded.enums.CourseName;
+import com.foxminded.mappers.GroupMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -30,15 +25,12 @@ class GroupsServiceImplTest {
     private GroupsServiceImpl groupsService;
     @Mock
     private GroupDao groupDao;
-    private GroupDTOMapper groupMapper;
 
-    @BeforeEach
-    void init() {
-        groupMapper = new GroupDTOMapper();
-    }
+    private GroupMapper groupMapper;
 
     @Test
     void testGetAllGroups_Success() {
+        groupMapper = GroupMapper.INSTANCE;
         Group group1 = new Group();
         group1.setId(1);
         group1.setName("name1");

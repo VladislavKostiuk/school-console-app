@@ -15,15 +15,12 @@ public class GroupDao {
 
     @PersistenceContext
     private EntityManager entityManager;
-    private final Logger logger;
 
     public GroupDao() {
-        logger = LoggerFactory.getLogger(GroupDao.class);
     }
 
     public GroupDao(EntityManager entityManager) {
         this.entityManager = entityManager;
-        logger = LoggerFactory.getLogger(GroupDao.class);
     }
 
     public void saveGroups(List<Group> groups) {

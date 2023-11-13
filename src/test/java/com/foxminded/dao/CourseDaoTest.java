@@ -1,17 +1,16 @@
 package com.foxminded.dao;
 
-import com.foxminded.AbstractPostgreSQLTestContainer;
+import com.foxminded.AbstractDaoTest;
 import com.foxminded.domain.Course;
 import com.foxminded.enums.CourseName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CourseDaoTest extends AbstractPostgreSQLTestContainer {
+class CourseDaoTest extends AbstractDaoTest {
 
     private CourseDao courseDao;
 

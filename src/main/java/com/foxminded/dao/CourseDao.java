@@ -15,15 +15,11 @@ import java.util.List;
 public class CourseDao {
     @PersistenceContext
     private EntityManager entityManager;
-    private final Logger logger;
 
-    public CourseDao() {
-        logger = LoggerFactory.getLogger(CourseDao.class);
-    }
+    public CourseDao() {}
 
     public CourseDao(EntityManager entityManager) {
         this.entityManager = entityManager;
-        logger = LoggerFactory.getLogger(CourseDao.class);
     }
 
     public void saveCourses(List<Course> courses) {

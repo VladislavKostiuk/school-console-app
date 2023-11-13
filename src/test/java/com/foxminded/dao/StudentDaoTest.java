@@ -1,11 +1,10 @@
 package com.foxminded.dao;
 
-import com.foxminded.AbstractPostgreSQLTestContainer;
+import com.foxminded.AbstractDaoTest;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.enums.CourseName;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +13,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
-class StudentDaoTest extends AbstractPostgreSQLTestContainer {
+class StudentDaoTest extends AbstractDaoTest {
 
     private StudentDao studentDao;
     private Group testGroup;
