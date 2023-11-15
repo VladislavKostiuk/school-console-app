@@ -11,8 +11,6 @@ public interface StudentsService {
 
     List<GroupDTO> getGroupsByStudentAmount(int number);
 
-//    List<StudentDTO> getStudentsByIds(List<Integer> ids);
-
     void saveStudent(String firstName, String lastName, GroupDTO groupDTO);
 
     void deleteStudentById(int id);

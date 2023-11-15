@@ -10,8 +10,6 @@ import java.util.Map;
 
 public interface GroupsService {
 
-//    List<GroupDTO> getGroupsByIds(List<Integer> ids);
-
     List<Group> getAllGroups();
 
     GroupDTO getGroupByName(String name);

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 
 @Repository
-//@Transactional
 public interface StudentRepository extends JpaRepository<Student, Long> {
 
     @Query("SELECT s.group FROM Student s GROUP BY s.group HAVING COUNT(*) <= :amount")

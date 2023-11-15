@@ -1,6 +1,5 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.mappers.CourseMapperImpl;
 import com.foxminded.mappers.GroupMapperImpl;
 import com.foxminded.repository.GroupRepository;
 import com.foxminded.domain.Group;
@@ -9,8 +8,6 @@ import com.foxminded.mappers.GroupMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,8 +20,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(SpringExtension.class)
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
 @ContextConfiguration(classes = {
         GroupMapperImpl.class
 })
