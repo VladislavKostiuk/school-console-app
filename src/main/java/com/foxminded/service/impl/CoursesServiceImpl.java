@@ -1,6 +1,8 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.CourseDao;
+import com.foxminded.constants.ErrorMessages;
+import com.foxminded.domain.Course;
+import com.foxminded.repository.CourseRepository;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.mappers.CourseMapper;
 import com.foxminded.enums.CourseName;
@@ -13,21 +15,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class CoursesServiceImpl implements CoursesService {
 
-    private final CourseDao courseDao;
+    private final CourseRepository courseRepository;
     private final CourseMapper courseMapper;
     private final Logger logger;
 
     @Autowired
-    public CoursesServiceImpl(CourseDao courseDao) {
-        this.courseDao = courseDao;
-        this.courseMapper = CourseMapper.INSTANCE;
+    public CoursesServiceImpl(CourseRepository courseRepository,
+                              CourseMapper courseMapper) {
+        this.courseRepository = courseRepository;
+        this.courseMapper = courseMapper;
         logger = LoggerFactory.getLogger(CoursesServiceImpl.class);
     }
 
     @Override
     public CourseDTO getCourseByName(CourseName courseName) {
         logger.info("Getting course by name {}", courseName);
-        return courseMapper.mapToCourseDTO(courseDao.getCourseByName(courseName));
+        Course course = courseRepository.findByName(courseName).orElseThrow(
+                () -> new IllegalArgumentException(String.format(ErrorMessages.COURSE_DOES_NOT_EXIST, courseName))
+        );
+        return courseMapper.mapToCourseDTO(course);
     }
 
 }

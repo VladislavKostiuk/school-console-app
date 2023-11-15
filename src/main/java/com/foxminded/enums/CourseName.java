@@ -14,7 +14,7 @@ public enum CourseName {
     ECONOMICS,
     MEDICINE;
 
-    public static CourseName convertStringToCourseName(String name) {
+    public static CourseName fromStringValue(String name) {
         try {
             return CourseName.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException e) {

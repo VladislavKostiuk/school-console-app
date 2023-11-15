@@ -5,15 +5,16 @@ import com.foxminded.dto.GroupDTO;
 import com.foxminded.dto.StudentDTO;
 import com.foxminded.mappers.GroupMapper;
 import com.foxminded.enums.CourseName;
+import com.foxminded.mappers.GroupMapperImpl;
 import com.foxminded.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.*;
 import static java.util.stream.Collectors.toList;
@@ -21,10 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ContextConfiguration(classes = {
+        GroupMapperImpl.class
+})
 class SchoolApplicationTest {
 
-    @InjectMocks
     private SchoolApplication schoolApplication;
     @Mock
     private CoursesService coursesService;
@@ -37,12 +40,14 @@ class SchoolApplicationTest {
     private List<CourseDTO> testCourses;
     private List<GroupDTO> testGroups;
     private List<StudentDTO> testStudents;
-
+    @Autowired
     private GroupMapper groupMapper;
 
     @BeforeEach
     void setUp() {
-        groupMapper = GroupMapper.INSTANCE;
+        schoolApplication = new SchoolApplication(
+                coursesService, groupsService, studentsService, databaseInitService
+        );
         CourseDTO course1 = new CourseDTO(
                 1,
                 CourseName.ART.toString(),
@@ -153,8 +158,7 @@ class SchoolApplicationTest {
     @Test
     void testDeleteStudentById() {
         int id = 1;
-        when(studentsService.deleteStudentById(id)).thenReturn(true);
-        assertTrue(schoolApplication.deleteStudentById(id));
+        schoolApplication.deleteStudentById(id);
         verify(studentsService, times(1)).deleteStudentById(id);
     }
 
@@ -188,11 +192,9 @@ class SchoolApplicationTest {
     @Test
     void testDeleteStudentFromCourse_Success() {
         CourseName testCourseName = CourseName.ART;
-        int coursesAmountBeforeDelete = testStudents.get(0).coursesDTO().size();
 
         when(coursesService.getCourseByName(testCourseName)).thenReturn(testCourses.get(0));
-        when(studentsService.deleteStudentFromCourse(testStudents.get(0), testCourses.get(0))).thenReturn(true);
-        assertTrue(schoolApplication.deleteStudentFromCourse(testStudents.get(0), testCourseName.toString()));
+        schoolApplication.deleteStudentFromCourse(testStudents.get(0), testCourseName.toString());
 
         verify(coursesService, times(1)).getCourseByName(testCourseName);
         verify(studentsService, times(1)).deleteStudentFromCourse(testStudents.get(0), testCourses.get(0));

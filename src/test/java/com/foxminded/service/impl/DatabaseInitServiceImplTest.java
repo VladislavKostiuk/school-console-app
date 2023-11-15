@@ -1,8 +1,8 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.CourseDao;
-import com.foxminded.dao.GroupDao;
-import com.foxminded.dao.StudentDao;
+import com.foxminded.repository.CourseRepository;
+import com.foxminded.repository.GroupRepository;
+import com.foxminded.repository.StudentRepository;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
@@ -28,11 +28,11 @@ class DatabaseInitServiceImplTest {
     @InjectMocks
     private DatabaseInitServiceImpl databaseInitService;
     @Mock
-    private StudentDao studentDao;
+    private StudentRepository studentRepository;
     @Mock
-    private CourseDao courseDao;
+    private CourseRepository courseRepository;
     @Mock
-    private GroupDao groupDao;
+    private GroupRepository groupRepository;
     @Mock
     private TestDataGenerator testDataGenerator;
     private List<Course> testCourses;
@@ -83,9 +83,9 @@ class DatabaseInitServiceImplTest {
         when(testDataGenerator.generateTestCourses(3)).thenReturn(testCourses);
         when(testDataGenerator.generateTestGroups(2)).thenReturn(testGroups);
         when(testDataGenerator.generateTestStudents(2)).thenReturn(testStudents);
-        when(groupDao.getGroupsAmount()).thenReturn(0);
-        when(courseDao.getCoursesAmount()).thenReturn(0);
-        when(studentDao.getStudentsAmount()).thenReturn(0);
+        when(groupRepository.count()).thenReturn(0L);
+        when(courseRepository.count()).thenReturn(0L);
+        when(studentRepository.count()).thenReturn(0L);
 
         databaseInitService.init(3, 2, 2);
 
@@ -93,13 +93,13 @@ class DatabaseInitServiceImplTest {
         verify(testDataGenerator, times(1)).generateTestGroups(2);
         verify(testDataGenerator, times(1)).generateTestStudents(2);
 
-        verify(groupDao, times(1)).getGroupsAmount();
-        verify(courseDao, times(1)).getCoursesAmount();
-        verify(studentDao, times(1)).getStudentsAmount();
+        verify(groupRepository, times(1)).count();
+        verify(courseRepository, times(1)).count();
+        verify(studentRepository, times(1)).count();
 
-        verify(groupDao, times(1)).saveGroups(testGroups);
-        verify(courseDao, times(1)).saveCourses(testCourses);
-        verify(studentDao, times(1)).saveStudents(testStudents);
+        verify(groupRepository, times(1)).saveAll(testGroups);
+        verify(courseRepository, times(1)).saveAll(testCourses);
+        verify(studentRepository, times(1)).saveAll(testStudents);
 
         for (var student : testStudents) {
             assertNotNull(student.getGroup());

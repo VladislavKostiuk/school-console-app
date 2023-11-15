@@ -18,8 +18,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 public abstract class AbstractDaoTest {
     public static final String CONTAINER_VERSION = "postgres:latest";
     public static final PostgreSQLContainer<?> postgres;
-    @PersistenceContext
-    public EntityManager entityManager;
 
     static {
         postgres = new PostgreSQLContainer<>(CONTAINER_VERSION);

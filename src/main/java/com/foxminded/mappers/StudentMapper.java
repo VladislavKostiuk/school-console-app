@@ -6,9 +6,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(uses = {GroupMapper.class, CourseMapper.class})
+//@Mapper(uses = {GroupMapper.class, CourseMapper.class})
+@Mapper(componentModel = "spring")
 public interface StudentMapper {
-    StudentMapper INSTANCE = Mappers.getMapper(StudentMapper.class);
+
     @Mapping(source = "student.group", target = "groupDTO")
     @Mapping(source = "student.courses", target = "coursesDTO")
     StudentDTO mapToStudentDTO(Student student);

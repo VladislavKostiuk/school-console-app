@@ -5,9 +5,8 @@ import com.foxminded.dto.CourseDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface CourseMapper {
-    CourseMapper INSTANCE  = Mappers.getMapper(CourseMapper.class);
 
     CourseDTO mapToCourseDTO(Course course);
     Course mapToCourse(CourseDTO courseDTO);
