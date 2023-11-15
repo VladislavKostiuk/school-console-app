@@ -1,6 +1,5 @@
 package com.foxminded.ui;
 
-import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.dto.CourseDTO;
 import com.foxminded.dto.GroupDTO;
@@ -100,14 +99,14 @@ public class SchoolApplication {
         studentsService.saveStudent(firstName, lastName, group);
     }
 
-    public boolean deleteStudentById(int id) {
+    public void deleteStudentById(int id) {
         logger.info("Start deleting student by id {}", id);
-        return studentsService.deleteStudentById(id);
+        studentsService.deleteStudentById(id);
     }
 
     public void addStudentToCourse(StudentDTO studentDTO, String stringCourseName) {
         logger.info("Start saving student {} {} to course {}", studentDTO.firstName(), studentDTO.lastName(), stringCourseName);
-        CourseName courseName = CourseName.convertStringToCourseName(stringCourseName);
+        CourseName courseName = CourseName.fromStringValue(stringCourseName);
         List<CourseDTO> studentCourseDTOs = studentDTO.coursesDTO();
         List<String> studentCourseNames = studentCourseDTOs.stream().map(CourseDTO::name).toList();
 
@@ -121,9 +120,9 @@ public class SchoolApplication {
 
 
 
-    public boolean deleteStudentFromCourse(StudentDTO studentDTO, String stringCourseName) {
+    public void deleteStudentFromCourse(StudentDTO studentDTO, String stringCourseName) {
         logger.info("Start deleting student {} {} from course {}", studentDTO.firstName(), studentDTO.lastName(), stringCourseName);
-        CourseName courseName = CourseName.convertStringToCourseName(stringCourseName);
+        CourseName courseName = CourseName.fromStringValue(stringCourseName);
         List<CourseDTO> studentCourseDTOs = studentDTO.coursesDTO();
         List<String> studentCourseNames = studentCourseDTOs.stream().map(CourseDTO::name).toList();
 
@@ -132,7 +131,7 @@ public class SchoolApplication {
         }
 
         CourseDTO courseDTO = coursesService.getCourseByName(courseName);
-        return studentsService.deleteStudentFromCourse(studentDTO, courseDTO);
+        studentsService.deleteStudentFromCourse(studentDTO, courseDTO);
     }
 
     public List<String> getAllGroupNames() {
@@ -159,7 +158,7 @@ public class SchoolApplication {
     private void printStudentsByCourse(Scanner console) {
         System.out.println("Print course name from the list below: ");
         printAllCourseNames();
-        CourseName courseName = CourseName.convertStringToCourseName(console.nextLine());
+        CourseName courseName = CourseName.fromStringValue(console.nextLine());
 
         List<StudentDTO> students = findStudentsByCourse(courseName);
         logger.info("Printing students");
@@ -184,15 +183,10 @@ public class SchoolApplication {
     private void startDeletingStudentById(Scanner console) {
         System.out.println("Print student id: ");
         int id = convertStringToInt(console.nextLine());
-        boolean isDeleted = deleteStudentById(id);
+        deleteStudentById(id);
 
-        if (isDeleted) {
-            logger.info("Student was deleted successfully");
-            System.out.println("Student with that id was deleted from db");
-        } else {
-            logger.warn("Student was not deleted");
-            System.out.println("Student with that id wasn't found");
-        }
+        logger.info("Student was deleted successfully");
+        System.out.println("Student with that id was deleted from db");
     }
 
     private void startAddingStudentToCourse(Scanner console) {
@@ -220,13 +214,10 @@ public class SchoolApplication {
         System.out.println("\nPrint course that you want to remove from this student:");
         String courseName = console.nextLine();
 
-        boolean isDeleted = deleteStudentFromCourse(student, courseName);
-        if (isDeleted) {
-            logger.info("Student was deleted from course successfully");
-            System.out.println(courseName + " was deleted from course list of that student");
-        } else {
-            logger.warn("Student was not deleted from course");
-        }
+        deleteStudentFromCourse(student, courseName);
+
+        logger.info("Student was deleted from course successfully");
+        System.out.println(courseName + " was deleted from course list of that student");
     }
 
     private void printCurrentStudentCourses(StudentDTO student) {

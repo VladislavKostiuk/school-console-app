@@ -5,9 +5,9 @@ import com.foxminded.dto.GroupDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface GroupMapper {
-    GroupMapper INSTANCE = Mappers.getMapper(GroupMapper.class);
+
     GroupDTO mapToGroupDTO(Group group);
     Group mapToGroup(GroupDTO groupDTO);
 

@@ -1,48 +1,59 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.StudentDao;
+import com.foxminded.mappers.*;
+import com.foxminded.repository.StudentRepository;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
 import com.foxminded.dto.GroupDTO;
 import com.foxminded.dto.StudentDTO;
-import com.foxminded.mappers.CourseMapper;
-import com.foxminded.mappers.GroupMapper;
-import com.foxminded.mappers.StudentMapper;
 import com.foxminded.enums.CourseName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration(classes = {
+        StudentMapperImpl.class,
+        GroupMapperImpl.class,
+        CourseMapperImpl.class
+})
 class StudentsServiceImplTest {
 
-    @InjectMocks
+
     private StudentsServiceImpl studentsService;
     @Mock
-    private StudentDao studentDao;
+    private StudentRepository studentRepository;
+    @Autowired
     private StudentMapper studentMapper;
+    @Autowired
     private GroupMapper groupMapper;
+    @Autowired
     private CourseMapper courseMapper;
     private Student testStudent;
     private Course testCourse;
 
     @BeforeEach
     void setUp() {
-        studentMapper = StudentMapper.INSTANCE;
-        groupMapper = GroupMapper.INSTANCE;
-        courseMapper = CourseMapper.INSTANCE;
+        studentsService = new StudentsServiceImpl(
+                studentRepository, studentMapper, groupMapper, courseMapper
+        );
         Group group = new Group();
         group.setId(1);
 
@@ -71,10 +82,10 @@ class StudentsServiceImplTest {
         group2.setName("name2");
 
         List<GroupDTO> expectedGroupDTOs = Stream.of(group1, group2).map(groupMapper::mapToGroupDTO).toList();
-        when(studentDao.getGroupsByStudentAmount(anyInt())).thenReturn(List.of(group1, group2));
-        List<GroupDTO> actualGroupDTOs = studentsService.getGroupsByStudentAmount(anyInt());
+        when(studentRepository.findGroupsByStudentAmount(anyLong())).thenReturn(List.of(group1, group2));
+        List<GroupDTO> actualGroupDTOs = studentsService.getGroupsByStudentAmount(20);
         assertEquals(expectedGroupDTOs, actualGroupDTOs);
-        verify(studentDao, times(1)).getGroupsByStudentAmount(anyInt());
+        verify(studentRepository, times(1)).findGroupsByStudentAmount(anyLong());
     }
 
     @Test
@@ -83,33 +94,37 @@ class StudentsServiceImplTest {
         group.setId(1);
         GroupDTO groupDTO = groupMapper.mapToGroupDTO(group);
         studentsService.saveStudent(testStudent.getFirstName(), testStudent.getLastName(), groupDTO);
-        verify(studentDao, times(1)).saveStudent(any());
+        verify(studentRepository, times(1)).save(any());
     }
 
     @Test
     public void testDeleteStudentById_Success() {
-        when(studentDao.deleteStudentById(1)).thenReturn(true);
-        boolean result = studentsService.deleteStudentById(1);
-        assertTrue(result);
-        verify(studentDao, times(1)).deleteStudentById(1);
+        studentsService.deleteStudentById(1);
+        verify(studentRepository, times(1)).deleteById(1L);
     }
 
     @Test
     public void testGetStudentById_Success() {
-        when(studentDao.getStudentById(1)).thenReturn(testStudent);
+        when(studentRepository.findById(1L)).thenReturn(Optional.of(testStudent));
         StudentDTO expectedStudent = studentMapper.mapToStudentDTO(testStudent);
         assertEquals(expectedStudent, studentsService.getStudentById(1));
     }
 
     @Test
-    public void testGetStudentByCourse_Success() {
+    public void testGetStudentById_StudentWithThatIdDoesNotExist() {
+        when(studentRepository.findById(1L)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> studentsService.getStudentById(1));
+    }
+
+    @Test
+    public void testGetStudentsByCourse_Success() {
         testStudent.getCourses().add(testCourse);
 
-        when(studentDao.getStudentsByCourse(testCourse)).thenReturn(List.of(testStudent));
+        when(studentRepository.findStudentsByCoursesContaining(testCourse)).thenReturn(List.of(testStudent));
         List<StudentDTO> expectedStudentDTOs = Stream.of(testStudent).map(studentMapper::mapToStudentDTO).toList();
         List<StudentDTO> actualStudentDTOs = studentsService.getStudentsByCourse(courseMapper.mapToCourseDTO(testCourse));
         assertEquals(expectedStudentDTOs, actualStudentDTOs);
-        verify(studentDao, times(1)).getStudentsByCourse(testCourse);
+        verify(studentRepository, times(1)).findStudentsByCoursesContaining(testCourse);
     }
 
     @Test
@@ -117,16 +132,18 @@ class StudentsServiceImplTest {
         studentsService.addStudentToCourse(
                 studentMapper.mapToStudentDTO(testStudent), courseMapper.mapToCourseDTO(testCourse)
         );
-        verify(studentDao, times(1)).addStudentToCourse(testStudent, testCourse);
+        testStudent.getCourses().add(testCourse);
+        verify(studentRepository, times(1)).save(testStudent);
     }
 
     @Test
     void testDeleteStudentFromCourse_Success() {
-        when(studentDao.deleteStudentFromCourse(testStudent, testCourse)).thenReturn(true);
-        assertTrue(studentsService.deleteStudentFromCourse(
+        testStudent.getCourses().add(testCourse);
+        studentsService.deleteStudentFromCourse(
                 studentMapper.mapToStudentDTO(testStudent), courseMapper.mapToCourseDTO(testCourse)
-        ));
-        verify(studentDao, times(1)).deleteStudentFromCourse(testStudent, testCourse);
+        );
+        testStudent.getCourses().remove(testCourse);
+        verify(studentRepository, times(1)).save(testStudent);
     }
 
 }

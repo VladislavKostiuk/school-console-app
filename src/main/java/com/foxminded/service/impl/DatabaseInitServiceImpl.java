@@ -1,8 +1,8 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.CourseDao;
-import com.foxminded.dao.GroupDao;
-import com.foxminded.dao.StudentDao;
+import com.foxminded.repository.CourseRepository;
+import com.foxminded.repository.GroupRepository;
+import com.foxminded.repository.StudentRepository;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Group;
 import com.foxminded.domain.Student;
@@ -19,21 +19,21 @@ import java.util.Random;
 @Service
 public class DatabaseInitServiceImpl implements DatabaseInitService {
 
-    private final StudentDao studentDao;
-    private final CourseDao courseDao;
-    private final GroupDao groupDao;
+    private final StudentRepository studentRepository;
+    private final CourseRepository courseRepository;
+    private final GroupRepository groupRepository;
     private final TestDataGenerator testDataGenerator;
     private final Random random;
     private final Logger logger;
 
     @Autowired
-    public DatabaseInitServiceImpl(StudentDao studentDao,
-                                   CourseDao courseDao,
-                                   GroupDao groupDao,
+    public DatabaseInitServiceImpl(StudentRepository studentRepository,
+                                   CourseRepository courseRepository,
+                                   GroupRepository groupRepository,
                                    TestDataGenerator testDataGenerator) {
-        this.studentDao = studentDao;
-        this.courseDao = courseDao;
-        this.groupDao = groupDao;
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
+        this.groupRepository = groupRepository;
         this.testDataGenerator = testDataGenerator;
         random = new Random();
         logger = LoggerFactory.getLogger(DatabaseInitServiceImpl.class);
@@ -48,19 +48,19 @@ public class DatabaseInitServiceImpl implements DatabaseInitService {
 
         assignCoursesAndGroupsToStudents(students, groups, courses);
 
-        if (courseDao.getCoursesAmount() == 0) {
+        if (courseRepository.count() == 0) {
             logger.info("Saving test courses if courses table is empty");
-            courseDao.saveCourses(courses);
+            courseRepository.saveAll(courses);
         }
 
-        if (groupDao.getGroupsAmount() == 0) {
+        if (groupRepository.count() == 0) {
             logger.info("Saving test groups if groups table is empty");
-            groupDao.saveGroups(groups);
+            groupRepository.saveAll(groups);
         }
 
-        if (studentDao.getStudentsAmount() == 0) {
+        if (studentRepository.count() == 0) {
             logger.info("Saving test students if students table is empty");
-            studentDao.saveStudents(students);
+            studentRepository.saveAll(students);
         }
     }
 

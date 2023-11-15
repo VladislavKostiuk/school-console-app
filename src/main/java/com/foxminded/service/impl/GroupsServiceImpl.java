@@ -1,6 +1,7 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.GroupDao;
+import com.foxminded.constants.ErrorMessages;
+import com.foxminded.repository.GroupRepository;
 import com.foxminded.domain.Group;
 import com.foxminded.dto.GroupDTO;
 import com.foxminded.mappers.GroupMapper;
@@ -14,27 +15,30 @@ import java.util.List;
 @Service
 public class GroupsServiceImpl implements GroupsService {
 
-    private final GroupDao groupDao;
+    private final GroupRepository groupRepository;
     private final GroupMapper groupMapper;
     private final Logger logger;
 
     @Autowired
-    public GroupsServiceImpl(GroupDao groupDao) {
-        this.groupDao = groupDao;
-        this.groupMapper = GroupMapper.INSTANCE;
+    public GroupsServiceImpl(GroupRepository groupRepository,
+                             GroupMapper groupMapper) {
+        this.groupRepository = groupRepository;
+        this.groupMapper = groupMapper;
         logger = LoggerFactory.getLogger(GroupsServiceImpl.class);
     }
 
     @Override
     public List<Group> getAllGroups() {
         logger.info("Getting all group names");
-        return groupDao.getAllGroups();
+        return groupRepository.findAll();
     }
 
     @Override
     public GroupDTO getGroupByName(String name) {
         logger.info("Getting group by name {}", name);
-        return groupMapper.mapToGroupDTO(groupDao.getGroupByName(name));
+        return groupMapper.mapToGroupDTO(groupRepository.findByName(name).orElseThrow(
+                () -> new IllegalArgumentException(String.format(ErrorMessages.GROUP_DOES_NOT_EXIST, name))
+        ));
     }
 
 }

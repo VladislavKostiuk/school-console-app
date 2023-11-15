@@ -1,6 +1,7 @@
 package com.foxminded.service.impl;
 
-import com.foxminded.dao.StudentDao;
+import com.foxminded.constants.ErrorMessages;
+import com.foxminded.repository.StudentRepository;
 import com.foxminded.domain.Course;
 import com.foxminded.domain.Student;
 import com.foxminded.dto.CourseDTO;
@@ -19,25 +20,28 @@ import java.util.List;
 @Service
 public class StudentsServiceImpl implements StudentsService {
 
-    private final StudentDao studentDao;
+    private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
     private final GroupMapper groupMapper;
     private final CourseMapper courseMapper;
     private final Logger logger;
 
     @Autowired
-    public StudentsServiceImpl(StudentDao studentDao) {
-        this.studentDao = studentDao;
-        this.studentMapper = StudentMapper.INSTANCE;
-        this.groupMapper = GroupMapper.INSTANCE;
-        this.courseMapper = CourseMapper.INSTANCE;
+    public StudentsServiceImpl(StudentRepository studentRepository,
+                               StudentMapper studentMapper,
+                               GroupMapper groupMapper,
+                               CourseMapper courseMapper) {
+        this.studentRepository = studentRepository;
+        this.studentMapper = studentMapper;
+        this.groupMapper = groupMapper;
+        this.courseMapper = courseMapper;
         logger = LoggerFactory.getLogger(StudentsServiceImpl.class);
     }
 
     @Override
     public List<GroupDTO> getGroupsByStudentAmount(int number) {
         logger.info("Getting group ids by amount of students {}", number);
-        return studentDao.getGroupsByStudentAmount(number).stream().map(groupMapper::mapToGroupDTO).toList();
+        return studentRepository.findGroupsByStudentAmount(number).stream().map(groupMapper::mapToGroupDTO).toList();
     }
 
     @Override
@@ -47,41 +51,45 @@ public class StudentsServiceImpl implements StudentsService {
         student.setFirstName(firstName);
         student.setLastName(lastName);
         student.setGroup(groupMapper.mapToGroup(groupDTO));
-        studentDao.saveStudent(student);
+        studentRepository.save(student);
     }
 
     @Override
-    public boolean deleteStudentById(int id) {
+    public void deleteStudentById(int id) {
         logger.info("Deleting student by id {}", id);
-        return studentDao.deleteStudentById(id);
+        studentRepository.deleteById(Long.valueOf(id));
     }
 
     @Override
     public StudentDTO getStudentById(int id) {
         logger.info("Getting student by id {}", id);
-        return studentMapper.mapToStudentDTO(studentDao.getStudentById(id));
+        return studentMapper.mapToStudentDTO(studentRepository.findById(Long.valueOf(id)).orElseThrow(
+                () -> new IllegalArgumentException(String.format(ErrorMessages.STUDENT_DOES_NOT_EXIST, id))
+        ));
     }
 
     @Override
     public List<StudentDTO> getStudentsByCourse(CourseDTO courseDTO) {
         logger.info("Getting student by course {}", courseDTO.name());
         Course course = courseMapper.mapToCourse(courseDTO);
-        return studentDao.getStudentsByCourse(course).stream().map(studentMapper::mapToStudentDTO).toList();
+        return studentRepository.findStudentsByCoursesContaining(course).stream().map(studentMapper::mapToStudentDTO).toList();
     }
 
     @Override
     public void addStudentToCourse(StudentDTO studentDTO, CourseDTO courseDTO) {
         logger.info("Adding student {} to course {}", studentDTO, courseDTO.name());
-        Student student = studentMapper.mapToStudent(studentDTO);
         Course course = courseMapper.mapToCourse(courseDTO);
-        studentDao.addStudentToCourse(student, course);
+        Student student = studentMapper.mapToStudent(studentDTO);
+        student.getCourses().add(course);
+        studentRepository.save(student);
     }
 
     @Override
-    public boolean deleteStudentFromCourse(StudentDTO studentDTO, CourseDTO courseDTO) {
+    public void deleteStudentFromCourse(StudentDTO studentDTO, CourseDTO courseDTO) {
         logger.info("Deleting student {} from course {}", studentDTO, courseDTO.name());
-        Student student = studentMapper.mapToStudent(studentDTO);
         Course course = courseMapper.mapToCourse(courseDTO);
-        return studentDao.deleteStudentFromCourse(student, course);
+        Student student = studentMapper.mapToStudent(studentDTO);
+        student.getCourses().remove(course);
+        studentRepository.save(student);
     }
 }

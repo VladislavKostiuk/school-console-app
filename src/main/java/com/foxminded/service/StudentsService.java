@@ -15,7 +15,7 @@ public interface StudentsService {
 
     void saveStudent(String firstName, String lastName, GroupDTO groupDTO);
 
-    boolean deleteStudentById(int id);
+    void deleteStudentById(int id);
 
     StudentDTO getStudentById(int id);
 
@@ -23,6 +23,6 @@ public interface StudentsService {
 
     void addStudentToCourse(StudentDTO studentDTO, CourseDTO courseDTO);
 
-    boolean deleteStudentFromCourse(StudentDTO studentDTO, CourseDTO courseDTO);
+    void deleteStudentFromCourse(StudentDTO studentDTO, CourseDTO courseDTO);
 
 }

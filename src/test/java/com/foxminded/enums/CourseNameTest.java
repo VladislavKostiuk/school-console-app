@@ -9,12 +9,12 @@ class CourseNameTest {
 
     @Test
     void testConvertStringToCourseName_Success() {
-        assertEquals(CourseName.ART, CourseName.convertStringToCourseName("ART"));
+        assertEquals(CourseName.ART, CourseName.fromStringValue("ART"));
     }
 
     @Test
     void testConvertStringToCourseName_CourseWithThatNameDoesNotExist() {
-        assertThrows(IllegalArgumentException.class, () -> CourseName.convertStringToCourseName("non-existent name"));
+        assertThrows(IllegalArgumentException.class, () -> CourseName.fromStringValue("non-existent name"));
     }
 
 }
